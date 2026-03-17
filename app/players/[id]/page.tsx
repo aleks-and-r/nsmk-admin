@@ -3,19 +3,13 @@
 import type { ReactNode } from "react";
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePlayerById } from "@/hooks/queries/usePlayers";
 import { createPlayer, updatePlayer } from "@/services/players.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
 import ImageUpload from "@/components/admin/ImageUpload";
 
-const POSITION_OPTIONS = [
-  "",
-  "Point guard",
-  "Shooting guard",
-  "Small forward",
-  "Power forward",
-  "Center",
-];
+const POSITION_OPTIONS = ["", "PG", "SG", "SF", "PF", "C"];
 const VISIBILITY_OPTIONS = ["Default", "Visible", "Hidden"];
 
 interface FormState {
@@ -36,6 +30,8 @@ const EMPTY_FORM: FormState = {
   image_visibility: "Default",
 };
 
+type FormErrors = Partial<Record<keyof FormState, string>>;
+
 export default function PlayerPage({
   params,
 }: {
@@ -45,10 +41,12 @@ export default function PlayerPage({
   const isNew = id === "new";
   const router = useRouter();
 
-  // Pass empty string when creating — disables the query (enabled: !!id)
   const { data: player, isLoading, isError } = usePlayerById(isNew ? "" : id);
 
+  const queryClient = useQueryClient();
+
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
@@ -70,10 +68,26 @@ export default function PlayerPage({
 
   function handleChange(key: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
     setSaveStatus("idle");
   }
 
+  function validate(): FormErrors {
+    if (!isNew) return {};
+    const e: FormErrors = {};
+    if (!form.first_name.trim()) e.first_name = "First name is required.";
+    if (!form.last_name.trim()) e.last_name = "Last name is required.";
+    if (!form.birth_year.trim()) e.birth_year = "Year of birth is required.";
+    return e;
+  }
+
   async function handleSave() {
+    const e = validate();
+    if (Object.keys(e).length > 0) {
+      setErrors(e);
+      return;
+    }
+
     setSaving(true);
     setSaveStatus("idle");
     try {
@@ -104,6 +118,7 @@ export default function PlayerPage({
       }
 
       setSaveStatus("success");
+      await queryClient.invalidateQueries({ queryKey: ["players/"] });
       if (isNew) {
         setTimeout(() => router.push("/players"), 1000);
       }
@@ -144,21 +159,21 @@ export default function PlayerPage({
       <ImageUpload onFileChange={setImageFile} />
 
       <div className="bg-card-bg border border-card-border rounded-lg p-6 space-y-5">
-        <Field label="First name">
+        <Field label="First name" required={isNew} error={errors.first_name}>
           <input
             type="text"
             value={form.first_name}
             onChange={(e) => handleChange("first_name", e.target.value)}
-            className={inputCls}
+            className={inputCls(!!errors.first_name)}
           />
         </Field>
 
-        <Field label="Last name">
+        <Field label="Last name" required={isNew} error={errors.last_name}>
           <input
             type="text"
             value={form.last_name}
             onChange={(e) => handleChange("last_name", e.target.value)}
-            className={inputCls}
+            className={inputCls(!!errors.last_name)}
           />
         </Field>
 
@@ -167,7 +182,7 @@ export default function PlayerPage({
             type="text"
             value={form.middle_name}
             onChange={(e) => handleChange("middle_name", e.target.value)}
-            className={inputCls}
+            className={inputCls()}
           />
         </Field>
 
@@ -175,7 +190,7 @@ export default function PlayerPage({
           <select
             value={form.position}
             onChange={(e) => handleChange("position", e.target.value)}
-            className={inputCls}
+            className={inputCls()}
           >
             {POSITION_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
@@ -185,12 +200,12 @@ export default function PlayerPage({
           </select>
         </Field>
 
-        <Field label="Year of birth">
+        <Field label="Year of birth" required={isNew} error={errors.birth_year}>
           <input
             type="number"
             value={form.birth_year}
             onChange={(e) => handleChange("birth_year", e.target.value)}
-            className={inputCls}
+            className={inputCls(!!errors.birth_year)}
             min={1950}
             max={2020}
           />
@@ -200,7 +215,7 @@ export default function PlayerPage({
           <select
             value={form.image_visibility}
             onChange={(e) => handleChange("image_visibility", e.target.value)}
-            className={inputCls}
+            className={inputCls()}
           >
             {VISIBILITY_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
@@ -238,16 +253,32 @@ export default function PlayerPage({
   );
 }
 
-const inputCls =
-  "w-full px-3 py-2 bg-background border border-card-border rounded text-sm text-foreground focus:ring-2 focus:ring-accent focus:outline-none";
+const inputCls = (hasError = false) =>
+  `w-full px-3 py-2 bg-background border rounded text-sm text-foreground focus:ring-2 focus:outline-none ${
+    hasError
+      ? "border-red-500 focus:ring-red-500"
+      : "border-card-border focus:ring-accent"
+  }`;
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: ReactNode;
+}) {
   return (
     <div>
       <label className="block text-sm font-medium text-foreground mb-1">
         {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

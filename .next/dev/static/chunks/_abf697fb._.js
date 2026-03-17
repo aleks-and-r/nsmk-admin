@@ -8,30 +8,51 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/axios/lib/axios.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/auth.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$auth$2e$service$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/services/auth.service.ts [app-client] (ecmascript)");
 ;
-const BASE_URL = ("TURBOPACK compile-time value", "http://api.wlakinsson.uk/api/") ?? "http://localhost:3001/api";
+;
+;
 const apiClient = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].create({
-    // Trailing slash is required so relative paths (e.g. 'players') resolve correctly
-    // under the /api prefix.  Without it, axios would strip the last segment.
-    baseURL: BASE_URL.endsWith("/") ? BASE_URL : `${BASE_URL}/`,
+    baseURL: ("TURBOPACK compile-time value", "https://api.wlakinsson.uk/api/") ?? 'http://localhost:3001/api/',
     timeout: 10000,
     headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
     }
 });
+// ── Request: inject access token ───────────────────────────────────────────
 apiClient.interceptors.request.use((config)=>{
     if ("TURBOPACK compile-time truthy", 1) {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
     }
     return config;
 });
-apiClient.interceptors.response.use((response)=>response, (error)=>{
+apiClient.interceptors.response.use((response)=>response, async (error)=>{
+    const config = error.config;
+    if (error.response?.status === 401 && !config._retry) {
+        config._retry = true;
+        const refresh = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getRefreshToken"])();
+        if (!refresh) {
+            (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["clearAuthState"])();
+            if ("TURBOPACK compile-time truthy", 1) window.location.href = '/login';
+            return Promise.reject(error);
+        }
+        try {
+            const { access } = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$auth$2e$service$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["refreshTokenApi"])(refresh);
+            (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["storeNewAccessToken"])(access);
+            config.headers.Authorization = `Bearer ${access}`;
+            return apiClient(config);
+        } catch  {
+            (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["clearAuthState"])();
+            if ("TURBOPACK compile-time truthy", 1) window.location.href = '/login';
+            return Promise.reject(error);
+        }
+    }
     if ("TURBOPACK compile-time truthy", 1) {
-        // console.warn avoids Next.js DevTools treating this as an error overlay
-        console.warn("[API Error]", error.response?.status ?? "Network Error", error.config?.url, error.message, error.response?.data ?? "");
+        console.warn('[API Error]', error.response?.status ?? 'Network Error', error.config?.url, error.message, error.response?.data ?? '');
     }
     return Promise.reject(error);
 });

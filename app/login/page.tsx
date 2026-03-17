@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuthState, validateCredentials, setAuthState } from '@/lib/auth';
+import { getAuthState } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   useEffect(() => {
     if (getAuthState()) {
@@ -16,20 +19,26 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (validateCredentials(username, password)) {
-      setAuthState(username);
+    setLoading(true);
+    setError('');
+    try {
+      await login(username, password);
       router.push('/');
-    } else {
-      setError('Invalid username or password.');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+        ?? 'Invalid username or password.';
+      setError(message);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm bg-card-bg border border-card-border rounded-xl shadow-lg p-8">
-        {/* Logo / branding */}
         <div className="text-center mb-8">
           <div className="text-3xl font-black text-accent mb-1">LZR</div>
           <p className="text-sm text-foreground/50">Sign in to your account</p>
@@ -68,15 +77,14 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <button
             type="submit"
-            className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent/90 text-white font-semibold text-sm transition-colors"
+            disabled={loading}
+            className="w-full py-2.5 rounded-lg bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold text-sm transition-colors"
           >
-            Sign In
+            {loading ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
       </div>

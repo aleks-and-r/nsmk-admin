@@ -92,14 +92,24 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 __turbopack_context__.s([
     "clearAuthState",
     ()=>clearAuthState,
+    "clearTokens",
+    ()=>clearTokens,
+    "getAccessToken",
+    ()=>getAccessToken,
     "getAuthState",
     ()=>getAuthState,
+    "getRefreshToken",
+    ()=>getRefreshToken,
     "setAuthState",
     ()=>setAuthState,
-    "validateCredentials",
-    ()=>validateCredentials
+    "setTokens",
+    ()=>setTokens,
+    "storeNewAccessToken",
+    ()=>storeNewAccessToken
 ]);
 const AUTH_KEY = 'nsmk_auth';
+const TOKEN_KEY = 'token';
+const REFRESH_KEY = 'nsmk_refresh';
 function getAuthState() {
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;
@@ -121,9 +131,34 @@ function clearAuthState() {
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;
     localStorage.removeItem(AUTH_KEY);
+    clearTokens();
 }
-function validateCredentials(username, password) {
-    return username === 'admin123' && password === 'admin123';
+function getAccessToken() {
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    return localStorage.getItem(TOKEN_KEY);
+}
+function setTokens(access, refresh) {
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    localStorage.setItem(TOKEN_KEY, access);
+    localStorage.setItem(REFRESH_KEY, refresh);
+}
+function getRefreshToken() {
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    return localStorage.getItem(REFRESH_KEY);
+}
+function clearTokens() {
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_KEY);
+}
+function storeNewAccessToken(access) {
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    localStorage.setItem(TOKEN_KEY, access);
 }
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);

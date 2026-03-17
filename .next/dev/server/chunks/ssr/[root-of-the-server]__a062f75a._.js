@@ -99,14 +99,24 @@ module.exports = mod;
 __turbopack_context__.s([
     "clearAuthState",
     ()=>clearAuthState,
+    "clearTokens",
+    ()=>clearTokens,
+    "getAccessToken",
+    ()=>getAccessToken,
     "getAuthState",
     ()=>getAuthState,
+    "getRefreshToken",
+    ()=>getRefreshToken,
     "setAuthState",
     ()=>setAuthState,
-    "validateCredentials",
-    ()=>validateCredentials
+    "setTokens",
+    ()=>setTokens,
+    "storeNewAccessToken",
+    ()=>storeNewAccessToken
 ]);
 const AUTH_KEY = 'nsmk_auth';
+const TOKEN_KEY = 'token';
+const REFRESH_KEY = 'nsmk_refresh';
 function getAuthState() {
     if ("TURBOPACK compile-time truthy", 1) return null;
     //TURBOPACK unreachable
@@ -122,8 +132,30 @@ function clearAuthState() {
     //TURBOPACK unreachable
     ;
 }
-function validateCredentials(username, password) {
-    return username === 'admin123' && password === 'admin123';
+function getAccessToken() {
+    if ("TURBOPACK compile-time truthy", 1) return null;
+    //TURBOPACK unreachable
+    ;
+}
+function setTokens(access, refresh) {
+    if ("TURBOPACK compile-time truthy", 1) return;
+    //TURBOPACK unreachable
+    ;
+}
+function getRefreshToken() {
+    if ("TURBOPACK compile-time truthy", 1) return null;
+    //TURBOPACK unreachable
+    ;
+}
+function clearTokens() {
+    if ("TURBOPACK compile-time truthy", 1) return;
+    //TURBOPACK unreachable
+    ;
+}
+function storeNewAccessToken(access) {
+    if ("TURBOPACK compile-time truthy", 1) return;
+    //TURBOPACK unreachable
+    ;
 }
 }),
 "[project]/src/components/admin/Sidebar.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {

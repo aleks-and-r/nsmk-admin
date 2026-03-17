@@ -14,6 +14,7 @@ export interface Player {
 
 export interface PlayerDetail {
   id: number;
+  short_id: string;
   first_name: string;
   last_name: string;
   birth_year: number;

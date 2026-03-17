@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAuthState, setAuthState, clearAuthState } from '@/lib/auth';
+import { getAuthState, setAuthState, clearAuthState, setTokens } from '@/lib/auth';
+import { loginApi } from '@/services/auth.service';
 
 interface AuthUser {
   username: string;
@@ -11,7 +12,7 @@ interface UseAuthReturn {
   isAuthenticated: boolean;
   user: AuthUser | null;
   mounted: boolean;
-  login: (username: string) => void;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -24,7 +25,9 @@ export function useAuth(): UseAuthReturn {
     setMounted(true);
   }, []);
 
-  function login(username: string) {
+  async function login(username: string, password: string): Promise<void> {
+    const { access, refresh } = await loginApi(username, password);
+    setTokens(access, refresh);
     setAuthState(username);
     setUser({ username });
   }

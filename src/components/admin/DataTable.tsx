@@ -16,6 +16,7 @@ interface DataTableProps<T extends { id: number | string }> {
   url: string;
   columns: TableColumn<T>[];
   editBasePath: string;
+  idKey?: string;
 }
 
 function getCellValue<T>(row: T, key: string): unknown {
@@ -32,11 +33,11 @@ export default function DataTable<T extends { id: number | string }>({
   url,
   columns,
   editBasePath,
+  idKey = 'id',
 }: DataTableProps<T>) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [pageSize, setPageSize] = useState(15);
 
   // Debounce search
   useEffect(() => {
@@ -49,12 +50,11 @@ export default function DataTable<T extends { id: number | string }>({
 
   const { data, isLoading, isError } = usePaginatedData<T>(url, page, debouncedSearch);
 
-  // Capture page size from first successful response
-  useEffect(() => {
-    if (data?.results.length) {
-      setPageSize(data.results.length);
-    }
-  }, [data]);
+  // Page size is determined by the API; infer from a full page (next != null),
+  // otherwise fall back to total count or default 15.
+  const pageSize = data?.next
+    ? data.results.length
+    : (data?.count ?? 15);
 
   const totalPages = data ? Math.ceil(data.count / pageSize) : 1;
   const from = data ? (page - 1) * pageSize + 1 : 0;
@@ -144,8 +144,6 @@ export default function DataTable<T extends { id: number | string }>({
           <table className="w-full">
             <thead>
               <tr className="border-b border-card-border">
-                {/* Checkbox / index col */}
-                <th className="w-12 px-4 py-3" />
                 {columns.map((col) => (
                   <th
                     key={col.key}
@@ -163,9 +161,6 @@ export default function DataTable<T extends { id: number | string }>({
               {isLoading && (
                 Array.from({ length: 8 }).map((_, i) => (
                   <tr key={i} className="border-b border-card-border">
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-4 rounded bg-card-border animate-pulse" />
-                    </td>
                     {columns.map((col) => (
                       <td key={col.key} className="px-4 py-3">
                         <div className="h-4 rounded bg-card-border animate-pulse" style={{ width: `${60 + Math.random() * 40}%` }} />
@@ -181,7 +176,7 @@ export default function DataTable<T extends { id: number | string }>({
               {isError && (
                 <tr>
                   <td
-                    colSpan={columns.length + 2}
+                    colSpan={columns.length + 1}
                     className="px-4 py-8 text-center text-sm text-red-500"
                   >
                     Failed to load data. Please try again.
@@ -192,7 +187,7 @@ export default function DataTable<T extends { id: number | string }>({
               {!isLoading && !isError && data?.results.length === 0 && (
                 <tr>
                   <td
-                    colSpan={columns.length + 2}
+                    colSpan={columns.length + 1}
                     className="px-4 py-8 text-center text-sm text-foreground/40"
                   >
                     No results found.
@@ -200,12 +195,13 @@ export default function DataTable<T extends { id: number | string }>({
                 </tr>
               )}
 
-              {!isLoading && !isError && data?.results.map((row) => (
+              {!isLoading && !isError && data?.results.map((row) => {
+                const rowIdValue = String((row as Record<string, unknown>)[idKey] ?? row.id);
+                return (
                 <tr
                   key={row.id}
                   className="border-b border-card-border last:border-0 hover:bg-black/[0.03] transition-colors"
                 >
-                  <td className="px-4 py-3 text-foreground/30 text-sm">{row.id}</td>
                   {columns.map((col) => {
                     const value = getCellValue(row, col.key);
                     return (
@@ -216,7 +212,7 @@ export default function DataTable<T extends { id: number | string }>({
                   })}
                   <td className="px-4 py-3">
                     <Link
-                      href={`${editBasePath}/${row.id}`}
+                      href={`${editBasePath}/${rowIdValue}`}
                       className="inline-flex items-center justify-center w-7 h-7 rounded bg-teal-600 hover:bg-teal-700 text-white transition-colors"
                       aria-label="Edit"
                     >
@@ -226,7 +222,8 @@ export default function DataTable<T extends { id: number | string }>({
                     </Link>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

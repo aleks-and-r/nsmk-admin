@@ -5,7 +5,7 @@ type AppRoutes = "/" | "/clubs" | "/clubs/[id]" | "/coaches" | "/coaches/[id]" |
 type PageRoutes = never
 type LayoutRoutes = "/"
 type RedirectRoutes = never
-type RewriteRoutes = never
+type RewriteRoutes = "/proxy/[[...path]]"
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
 
 
@@ -19,6 +19,7 @@ interface ParamMap {
   "/matches": {}
   "/players": {}
   "/players/[id]": { "id": string; }
+  "/proxy/[[...path]]": { "path"?: string[]; }
   "/takmicenja": {}
 }
 
