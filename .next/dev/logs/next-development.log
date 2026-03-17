@@ -2068,3 +2068,597 @@ Import traces:
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dde295dfa47e446',t:'MTc3Mzc3MzE5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 
+[05:14:54.615] Server  LOG     ✓ Compiled in 27ms
+[05:15:55.206] Server  LOG     ✓ Compiled in 35ms
+[05:19:28.348] Server  LOG     ✓ Compiled in 35ms
+[05:19:39.656] Server  LOG     ✓ Compiled in 26ms
+[05:19:46.227] Server  LOG     ✓ Compiled in 24ms
+[05:19:51.589] Server  LOG     ✓ Compiled in 46ms
+[05:19:53.616] Server  LOG     ✓ Compiled in 28ms
+[05:20:05.311] Server  LOG     ✓ Compiled in 28ms
+[05:25:45.344] Server  LOG     ✓ Compiled in 44ms
+[05:25:55.609] Server  LOG     ✓ Compiled in 27ms
+[05:25:55.751] Browser ERROR   ./src/components/admin/DataTable.tsx:60:7
+Parsing ecmascript source code failed
+  58 |       a.click();
+  59 |       URL.revokeObjectURL(href);
+> 60 |     } finally {
+     |       ^^^^^^^
+  61 |       setExporting(false);
+  62 |     }
+  63 |   }
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/admin/DataTable.tsx [Client Component Browser]
+    ./app/players/page.tsx [Client Component Browser]
+    ./app/players/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/admin/DataTable.tsx [Client Component SSR]
+    ./app/players/page.tsx [Client Component SSR]
+    ./app/players/page.tsx [Server Component]
+[05:25:55.751] Browser ERROR   ./src/components/admin/DataTable.tsx:105:3
+Parsing ecmascript source code failed
+  103 |   }
+  104 |
+> 105 |   return (
+      |   ^^^^^^^^
+> 106 |     <div>
+      | ^^^^^^^^^
+> 107 |       {/* Page title */}
+      | ^^^^^^^^^
+> 108 |       <h1 className="text-2xl font-bold text-foreground mb-6">{title}</h1>
+      | ^^^^^^^^^
+> 109 |
+      | ^^^^^^^^^
+> 110 |       {/* Card */}
+      | ^^^^^^^^^
+> 111 |       <div className="bg-card-bg border border-card-border rounded-lg overflow-hidden">
+      | ^^^^^^^^^
+> 112 |         {/* Toolbar */}
+      | ^^^^^^^^^
+> 113 |         <div className="flex items-center justify-end gap-2 px-4 py-3 border-b border-card-border flex-wrap">
+      | ^^^^^^^^^
+> 114 |           {/* Search */}
+      | ^^^^^^^^^
+> 115 |           <input
+      | ^^^^^^^^^
+> 116 |             type="text"
+      | ^^^^^^^^^
+> 117 |             placeholder="Search"
+      | ^^^^^^^^^
+> 118 |             value={search}
+      | ^^^^^^^^^
+> 119 |             onChange={(e) => setSearch(e.target.value)}
+      | ^^^^^^^^^
+> 120 |             className="px-3 py-1.5 text-sm rounded border border-card-border bg-background text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent w-48"
+      | ^^^^^^^^^
+> 121 |           />
+      | ^^^^^^^^^
+> 122 |
+      | ^^^^^^^^^
+> 123 |           {/* Add new */}
+      | ^^^^^^^^^
+> 124 |           <Link
+      | ^^^^^^^^^
+> 125 |             href={`${editBasePath}/new`}
+      | ^^^^^^^^^
+> 126 |             className="px-4 py-1.5 text-sm font-semibold rounded bg-accent hover:bg-accent/90 text-white transition-colors"
+      | ^^^^^^^^^
+> 127 |           >
+      | ^^^^^^^^^
+> 128 |             Add new
+      | ^^^^^^^^^
+> 129 |           </Link>
+      | ^^^^^^^^^
+> 130 |
+      | ^^^^^^^^^
+> 131 |           {/* Export icon (amber) */}
+      | ^^^^^^^^^
+> 132 |           <button
+      | ^^^^^^^^^
+> 133 |             onClick={handleExport}
+      | ^^^^^^^^^
+> 134 |             disabled={exporting}
+      | ^^^^^^^^^
+> 135 |             className="p-1.5 rounded bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white transition-colors"
+      | ^^^^^^^^^
+> 136 |             aria-label="Export"
+      | ^^^^^^^^^
+> 137 |             title="Export to CSV"
+      | ^^^^^^^^^
+> 138 |           >
+      | ^^^^^^^^^
+> 139 |             <svg
+      | ^^^^^^^^^
+> 140 |               xmlns="http://www.w3.org/2000/svg"
+      | ^^^^^^^^^
+> 141 |               className="w-4 h-4"
+      | ^^^^^^^^^
+> 142 |               fill="none"
+      | ^^^^^^^^^
+> 143 |               viewBox="0 0 24 24"
+      | ^^^^^^^^^
+> 144 |               stroke="currentColor"
+      | ^^^^^^^^^
+> 145 |             >
+      | ^^^^^^^^^
+> 146 |               <path
+      | ^^^^^^^^^
+> 147 |                 strokeLinecap="round"
+      | ^^^^^^^^^
+> 148 |                 strokeLinejoin="round"
+      | ^^^^^^^^^
+> 149 |                 strokeWidth={2}
+      | ^^^^^^^^^
+> 150 |                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      | ^^^^^^^^^
+> 151 |               />
+      | ^^^^^^^^^
+> 152 |             </svg>
+      | ^^^^^^^^^
+> 153 |           </button>
+      | ^^^^^^^^^
+> 154 |
+      | ^^^^^^^^^
+> 155 |           {/* Import / Download icon (teal) */}
+      | ^^^^^^^^^
+> 156 |           <button
+      | ^^^^^^^^^
+> 157 |             className="p-1.5 rounded bg-teal-500 hover:bg-teal-600 text-white transition-colors"
+      | ^^^^^^^^^
+> 158 |             aria-label="Import / Download"
+      | ^^^^^^^^^
+> 159 |             title="Import / Download CSV"
+      | ^^^^^^^^^
+> 160 |           >
+      | ^^^^^^^^^
+> 161 |             <div className="flex items-center gap-1">
+      | ^^^^^^^^^
+> 162 |               <svg
+      | ^^^^^^^^^
+> 163 |                 xmlns="http://www.w3.org/2000/svg"
+      | ^^^^^^^^^
+> 164 |                 className="w-4 h-4"
+      | ^^^^^^^^^
+> 165 |                 fill="none"
+      | ^^^^^^^^^
+> 166 |                 viewBox="0 0 24 24"
+      | ^^^^^^^^^
+> 167 |                 stroke="currentColor"
+      | ^^^^^^^^^
+> 168 |               >
+      | ^^^^^^^^^
+> 169 |                 <path
+      | ^^^^^^^^^
+> 170 |                   strokeLinecap="round"
+      | ^^^^^^^^^
+> 171 |                   strokeLinejoin="round"
+      | ^^^^^^^^^
+> 172 |                   strokeWidth={2}
+      | ^^^^^^^^^
+> 173 |                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"
+      | ^^^^^^^^^
+> 174 |                 />
+      | ^^^^^^^^^
+> 175 |                 <path
+      | ^^^^^^^^^
+> 176 |                   strokeLinecap="round"
+      | ^^^^^^^^^
+> 177 |                   strokeLinejoin="round"
+      | ^^^^^^^^^
+> 178 |                   strokeWidth={2}
+      | ^^^^^^^^^
+> 179 |                   d="M16 12l-4-4-4 4"
+      | ^^^^^^^^^
+> 180 |                 />
+      | ^^^^^^^^^
+> 181 |                 <path
+      | ^^^^^^^^^
+> 182 |                   strokeLinecap="round"
+      | ^^^^^^^^^
+> 183 |                   strokeLinejoin="round"
+      | ^^^^^^^^^
+> 184 |                   strokeWidth={2}
+      | ^^^^^^^^^
+> 185 |                   d="M12 20V8"
+      | ^^^^^^^^^
+> 186 |                 />
+      | ^^^^^^^^^
+> 187 |               </svg>
+      | ^^^^^^^^^
+> 188 |             </div>
+      | ^^^^^^^^^
+> 189 |           </button>
+      | ^^^^^^^^^
+> 190 |
+      | ^^^^^^^^^
+> 191 |           {/* Dropdown chevron */}
+      | ^^^^^^^^^
+> 192 |           <button
+      | ^^^^^^^^^
+> 193 |             className="p-1.5 rounded border border-card-border hover:bg-black/5 text-foreground/50 transition-colors"
+      | ^^^^^^^^^
+> 194 |             aria-label="More options"
+      | ^^^^^^^^^
+> 195 |           >
+      | ^^^^^^^^^
+> 196 |             <svg
+      | ^^^^^^^^^
+> 197 |               xmlns="http://www.w3.org/2000/svg"
+      | ^^^^^^^^^
+> 198 |               className="w-4 h-4"
+      | ^^^^^^^^^
+> 199 |               fill="none"
+      | ^^^^^^^^^
+> 200 |               viewBox="0 0 24 24"
+      | ^^^^^^^^^
+> 201 |               stroke="currentColor"
+      | ^^^^^^^^^
+> 202 |             >
+      | ^^^^^^^^^
+> 203 |               <path
+      | ^^^^^^^^^
+> 204 |                 strokeLinecap="round"
+      | ^^^^^^^^^
+> 205 |                 strokeLinejoin="round"
+      | ^^^^^^^^^
+> 206 |                 strokeWidth={2}
+      | ^^^^^^^^^
+> 207 |                 d="M19 9l-7 7-7-7"
+      | ^^^^^^^^^
+> 208 |               />
+      | ^^^^^^^^^
+> 209 |             </svg>
+      | ^^^^^^^^^
+> 210 |           </button>
+      | ^^^^^^^^^
+> 211 |         </div>
+      | ^^^^^^^^^
+> 212 |
+      | ^^^^^^^^^
+> 213 |         {/* Table */}
+      | ^^^^^^^^^
+> 214 |         <div className="overflow-x-auto">
+      | ^^^^^^^^^
+> 215 |           <table className="w-full">
+      | ^^^^^^^^^
+> 216 |             <thead>
+      | ^^^^^^^^^
+> 217 |               <tr className="border-b border-card-border">
+      | ^^^^^^^^^
+> 218 |                 {columns.map((col) => (
+      | ^^^^^^^^^
+> 219 |                   <th
+      | ^^^^^^^^^
+> 220 |                     key={col.key}
+      | ^^^^^^^^^
+> 221 |                     className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
+      | ^^^^^^^^^
+> 222 |                   >
+      | ^^^^^^^^^
+> 223 |                     {col.header}
+      | ^^^^^^^^^
+> 224 |                   </th>
+      | ^^^^^^^^^
+> 225 |                 ))}
+      | ^^^^^^^^^
+> 226 |                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50">
+      | ^^^^^^^^^
+> 227 |                   Actions
+      | ^^^^^^^^^
+> 228 |                 </th>
+      | ^^^^^^^^^
+> 229 |               </tr>
+      | ^^^^^^^^^
+> 230 |             </thead>
+      | ^^^^^^^^^
+> 231 |             <tbody>
+      | ^^^^^^^^^
+> 232 |               {isLoading &&
+      | ^^^^^^^^^
+> 233 |                 Array.from({ length: 8 }).map((_, i) => (
+      | ^^^^^^^^^
+> 234 |                   <tr key={i} className="border-b border-card-border">
+      | ^^^^^^^^^
+> 235 |                     {columns.map((col) => (
+      | ^^^^^^^^^
+> 236 |                       <td key={col.key} className="px-4 py-3">
+      | ^^^^^^^^^
+> 237 |                         <div
+      | ^^^^^^^^^
+> 238 |                           className="h-4 rounded bg-card-border animate-pulse"
+      | ^^^^^^^^^
+> 239 |                           style={{ width: `${60 + Math.random() * 40}%` }}
+      | ^^^^^^^^^
+> 240 |                         />
+      | ^^^^^^^^^
+> 241 |                       </td>
+      | ^^^^^^^^^
+> 242 |                     ))}
+      | ^^^^^^^^^
+> 243 |                     <td className="px-4 py-3">
+      | ^^^^^^^^^
+> 244 |                       <div className="h-7 w-7 rounded bg-card-border animate-pulse" />
+      | ^^^^^^^^^
+> 245 |                     </td>
+      | ^^^^^^^^^
+> 246 |                   </tr>
+      | ^^^^^^^^^
+> 247 |                 ))}
+      | ^^^^^^^^^
+> 248 |
+      | ^^^^^^^^^
+> 249 |               {isError && (
+      | ^^^^^^^^^
+> 250 |                 <tr>
+      | ^^^^^^^^^
+> 251 |                   <td
+      | ^^^^^^^^^
+> 252 |                     colSpan={columns.length + 1}
+      | ^^^^^^^^^
+> 253 |                     className="px-4 py-8 text-center text-sm text-red-500"
+      | ^^^^^^^^^
+> 254 |                   >
+      | ^^^^^^^^^
+> 255 |                     Failed to load data. Please try again.
+      | ^^^^^^^^^
+> 256 |                   </td>
+      | ^^^^^^^^^
+> 257 |                 </tr>
+      | ^^^^^^^^^
+> 258 |               )}
+      | ^^^^^^^^^
+> 259 |
+      | ^^^^^^^^^
+> 260 |               {!isLoading && !isError && data?.results.length === 0 && (
+      | ^^^^^^^^^
+> 261 |                 <tr>
+      | ^^^^^^^^^
+> 262 |                   <td
+      | ^^^^^^^^^
+> 263 |                     colSpan={columns.length + 1}
+      | ^^^^^^^^^
+> 264 |                     className="px-4 py-8 text-center text-sm text-foreground/40"
+      | ^^^^^^^^^
+> 265 |                   >
+      | ^^^^^^^^^
+> 266 |                     No results found.
+      | ^^^^^^^^^
+> 267 |                   </td>
+      | ^^^^^^^^^
+> 268 |                 </tr>
+      | ^^^^^^^^^
+> 269 |               )}
+      | ^^^^^^^^^
+> 270 |
+      | ^^^^^^^^^
+> 271 |               {!isLoading &&
+      | ^^^^^^^^^
+> 272 |                 !isError &&
+      | ^^^^^^^^^
+> 273 |                 data?.results.map((row) => {
+      | ^^^^^^^^^
+> 274 |                   const rowIdValue = String(
+      | ^^^^^^^^^
+> 275 |                     (row as Record<string, unknown>)[idKey] ?? row.id,
+      | ^^^^^^^^^
+> 276 |                   );
+      | ^^^^^^^^^
+> 277 |                   return (
+      | ^^^^^^^^^
+> 278 |                     <tr
+      | ^^^^^^^^^
+> 279 |                       key={row.id}
+      | ^^^^^^^^^
+> 280 |                       className="border-b border-card-border last:border-0 hover:bg-black/[0.03] transition-colors"
+      | ^^^^^^^^^
+> 281 |                     >
+      | ^^^^^^^^^
+> 282 |                       {columns.map((col) => {
+      | ^^^^^^^^^
+> 283 |                         const value = getCellValue(row, col.key);
+      | ^^^^^^^^^
+> 284 |                         return (
+      | ^^^^^^^^^
+> 285 |                           <td
+      | ^^^^^^^^^
+> 286 |                             key={col.key}
+      | ^^^^^^^^^
+> 287 |                             className="px-4 py-3 text-sm text-foreground"
+      | ^^^^^^^^^
+> 288 |                           >
+      | ^^^^^^^^^
+> 289 |                             {col.render
+      | ^^^^^^^^^
+> 290 |                               ? col.render(value, row)
+      | ^^^^^^^^^
+> 291 |                               : formatCellValue(value)}
+      | ^^^^^^^^^
+> 292 |                           </td>
+      | ^^^^^^^^^
+> 293 |                         );
+      | ^^^^^^^^^
+> 294 |                       })}
+      | ^^^^^^^^^
+> 295 |                       <td className="px-4 py-3">
+      | ^^^^^^^^^
+> 296 |                         <Link
+      | ^^^^^^^^^
+> 297 |                           href={`${editBasePath}/${rowIdValue}`}
+      | ^^^^^^^^^
+> 298 |                           className="inline-flex items-center justify-center w-7 h-7 rounded bg-teal-600 hover:bg-teal-700 text-white transition-colors"
+      | ^^^^^^^^^
+> 299 |                           aria-label="Edit"
+      | ^^^^^^^^^
+> 300 |                         >
+      | ^^^^^^^^^
+> 301 |                           <svg
+      | ^^^^^^^^^
+> 302 |                             xmlns="http://www.w3.org/2000/svg"
+      | ^^^^^^^^^
+> 303 |                             className="w-3.5 h-3.5"
+      | ^^^^^^^^^
+> 304 |                             fill="none"
+      | ^^^^^^^^^
+> 305 |                             viewBox="0 0 24 24"
+      | ^^^^^^^^^
+> 306 |                             stroke="currentColor"
+      | ^^^^^^^^^
+> 307 |                           >
+      | ^^^^^^^^^
+> 308 |                             <path
+      | ^^^^^^^^^
+> 309 |                               strokeLinecap="round"
+      | ^^^^^^^^^
+> 310 |                               strokeLinejoin="round"
+      | ^^^^^^^^^
+> 311 |                               strokeWidth={2}
+      | ^^^^^^^^^
+> 312 |                               d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+      | ^^^^^^^^^
+> 313 |                             />
+      | ^^^^^^^^^
+> 314 |                           </svg>
+      | ^^^^^^^^^
+> 315 |                         </Link>
+      | ^^^^^^^^^
+> 316 |                       </td>
+      | ^^^^^^^^^
+> 317 |                     </tr>
+      | ^^^^^^^^^
+> 318 |                   );
+      | ^^^^^^^^^
+> 319 |                 })}
+      | ^^^^^^^^^
+> 320 |             </tbody>
+      | ^^^^^^^^^
+> 321 |           </table>
+      | ^^^^^^^^^
+> 322 |         </div>
+      | ^^^^^^^^^
+> 323 |
+      | ^^^^^^^^^
+> 324 |         {/* Pagination */}
+      | ^^^^^^^^^
+> 325 |         {data && data.count > 0 && (
+      | ^^^^^^^^^
+> 326 |           <div className="flex items-center justify-between px-4 py-3 border-t border-card-border flex-wrap gap-2">
+      | ^^^^^^^^^
+> 327 |             <p className="text-sm text-foreground/50">
+      | ^^^^^^^^^
+> 328 |               Showing {from}–{to} of {data.count}
+      | ^^^^^^^^^
+> 329 |             </p>
+      | ^^^^^^^^^
+> 330 |
+      | ^^^^^^^^^
+> 331 |             <div className="flex items-center gap-1">
+      | ^^^^^^^^^
+> 332 |               <button
+      | ^^^^^^^^^
+> 333 |                 onClick={() => setPage((p) => p - 1)}
+      | ^^^^^^^^^
+> 334 |                 disabled={page === 1}
+      | ^^^^^^^^^
+> 335 |                 className="px-2.5 py-1 text-sm rounded border border-card-border hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-foreground"
+      | ^^^^^^^^^
+> 336 |               >
+      | ^^^^^^^^^
+> 337 |                 ‹ Prev
+      | ^^^^^^^^^
+> 338 |               </button>
+      | ^^^^^^^^^
+> 339 |
+      | ^^^^^^^^^
+> 340 |               {getPageNumbers().map((p, i) =>
+      | ^^^^^^^^^
+> 341 |                 p === "..." ? (
+      | ^^^^^^^^^
+> 342 |                   <span
+      | ^^^^^^^^^
+> 343 |                     key={`ellipsis-${i}`}
+      | ^^^^^^^^^
+> 344 |                     className="px-2 py-1 text-sm text-foreground/40"
+      | ^^^^^^^^^
+> 345 |                   >
+      | ^^^^^^^^^
+> 346 |                     …
+      | ^^^^^^^^^
+> 347 |                   </span>
+      | ^^^^^^^^^
+> 348 |                 ) : (
+      | ^^^^^^^^^
+> 349 |                   <button
+      | ^^^^^^^^^
+> 350 |                     key={p}
+      | ^^^^^^^^^
+> 351 |                     onClick={() => setPage(p)}
+      | ^^^^^^^^^
+> 352 |                     className={`w-8 h-8 text-sm rounded border transition-colors ${
+      | ^^^^^^^^^
+> 353 |                       p === page
+      | ^^^^^^^^^
+> 354 |                         ? "bg-accent text-white border-accent"
+      | ^^^^^^^^^
+> 355 |                         : "border-card-border hover:bg-black/5 text-foreground"
+      | ^^^^^^^^^
+> 356 |                     }`}
+      | ^^^^^^^^^
+> 357 |                   >
+      | ^^^^^^^^^
+> 358 |                     {p}
+      | ^^^^^^^^^
+> 359 |                   </button>
+      | ^^^^^^^^^
+> 360 |                 ),
+      | ^^^^^^^^^
+> 361 |               )}
+      | ^^^^^^^^^
+> 362 |
+      | ^^^^^^^^^
+> 363 |               <button
+      | ^^^^^^^^^
+> 364 |                 onClick={() => setPage((p) => p + 1)}
+      | ^^^^^^^^^
+> 365 |                 disabled={page === totalPages}
+      | ^^^^^^^^^
+> 366 |                 className="px-2.5 py-1 text-sm rounded border border-card-border hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-foreground"
+      | ^^^^^^^^^
+> 367 |               >
+      | ^^^^^^^^^
+> 368 |                 Next ›
+      | ^^^^^^^^^
+> 369 |               </button>
+      | ^^^^^^^^^
+> 370 |             </div>
+      | ^^^^^^^^^
+> 371 |           </div>
+      | ^^^^^^^^^
+> 372 |         )}
+      | ^^^^^^^^^
+> 373 |       </div>
+      | ^^^^^^^^^
+> 374 |     </div>
+      | ^^^^^^^^^
+> 375 |   );
+      | ^^^^^
+  376 | }
+  377 |
+
+Return statement is not allowed here
+
+Import traces:
+  Client Component Browser:
+    ./src/components/admin/DataTable.tsx [Client Component Browser]
+    ./app/players/page.tsx [Client Component Browser]
+    ./app/players/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/admin/DataTable.tsx [Client Component SSR]
+    ./app/players/page.tsx [Client Component SSR]
+    ./app/players/page.tsx [Server Component]
+[05:26:05.060] Server  LOG     ✓ Compiled in 66ms
