@@ -18,6 +18,7 @@ No test framework is configured.
 **Next.js 16 App Router** frontend for NSMK (Novosadska Gradska Liga Mlađih Kategorija), a youth basketball league in Novi Sad, Serbia.
 
 ### Stack
+
 - React 19, TypeScript 5, Tailwind CSS 4
 - TanStack React Query 5 for server state
 - Axios for API calls
@@ -36,20 +37,24 @@ No test framework is configured.
 **`src/components/`** — `PageLayout.tsx` (shared banner/wrapper), `Navigation.tsx` (sticky header), `ThemeToggle.tsx`.
 
 ### Path Aliases
+
 `@/*` maps to `./src/*`.
 
 ### Routing (App Router)
+
 - `/` — Home (placeholder)
 - `/clubs` — Clubs list with stats
 - `/matches` — Match results
 - `/players` — Player database
-- `/takmicenja` — Competitions (stub)
+- `/dashboard` — Competitions (stub)
 - `/o_nama` — About page
 
 Several navigation links in `Navigation.tsx` point to unimplemented routes (schedule, gallery, bulletins, documents, contact).
 
 ### Theme
+
 Default dark palette: `#1c2440` / `#2a3555` background with `#e07b35` orange accent.
 
 ### Environment
+
 `.env.local` holds `NEXT_PUBLIC_API_URL`. The current value points to a Cloudflare tunnel URL used for local development against a remote backend.

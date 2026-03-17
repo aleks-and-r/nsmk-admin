@@ -44,15 +44,33 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 "use strict";
 
 __turbopack_context__.s([
+    "createPlayer",
+    ()=>createPlayer,
+    "getPlayerById",
+    ()=>getPlayerById,
     "getPlayers",
     ()=>getPlayers,
     "getTopScorers",
-    ()=>getTopScorers
+    ()=>getTopScorers,
+    "updatePlayer",
+    ()=>updatePlayer
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/axios.ts [app-client] (ecmascript)");
 ;
 const getPlayers = async ()=>{
     const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("players/");
+    return data;
+};
+const getPlayerById = async (id)=>{
+    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get(`players/${id}/`);
+    return data;
+};
+const createPlayer = async (payload)=>{
+    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('players/', payload);
+    return data;
+};
+const updatePlayer = async (id, payload)=>{
+    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].patch(`players/${id}/`, payload);
     return data;
 };
 const getTopScorers = async (leagueId)=>{
@@ -71,6 +89,8 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 "use strict";
 
 __turbopack_context__.s([
+    "usePlayerById",
+    ()=>usePlayerById,
     "usePlayers",
     ()=>usePlayers,
     "useTopScorers",
@@ -78,7 +98,7 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@tanstack/react-query/build/modern/useQuery.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$players$2e$service$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/services/players.service.ts [app-client] (ecmascript)");
-var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature();
+var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.signature(), _s2 = __turbopack_context__.k.signature();
 ;
 ;
 const usePlayers = ()=>{
@@ -96,8 +116,27 @@ _s(usePlayers, "4ZpngI1uv+Uo3WQHEZmTQ5FNM+k=", false, function() {
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useQuery"]
     ];
 });
-const useTopScorers = (leagueId)=>{
+const usePlayerById = (id)=>{
     _s1();
+    return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useQuery"])({
+        queryKey: [
+            "players",
+            id
+        ],
+        queryFn: {
+            "usePlayerById.useQuery": ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$players$2e$service$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getPlayerById"])(id)
+        }["usePlayerById.useQuery"],
+        staleTime: 1000 * 60 * 5,
+        enabled: !!id
+    });
+};
+_s1(usePlayerById, "4ZpngI1uv+Uo3WQHEZmTQ5FNM+k=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useQuery"]
+    ];
+});
+const useTopScorers = (leagueId)=>{
+    _s2();
     return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useQuery"])({
         queryKey: [
             "topScorers",
@@ -110,7 +149,7 @@ const useTopScorers = (leagueId)=>{
         enabled: !!leagueId
     });
 };
-_s1(useTopScorers, "4ZpngI1uv+Uo3WQHEZmTQ5FNM+k=", false, function() {
+_s2(useTopScorers, "4ZpngI1uv+Uo3WQHEZmTQ5FNM+k=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useQuery"]
     ];
@@ -124,26 +163,26 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 
 __turbopack_context__.s([
     "default",
-    ()=>TakmicenjaPage
+    ()=>DashboardPage
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$queries$2f$usePlayers$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/queries/usePlayers.ts [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
-'use client';
+"use client";
 ;
 ;
-function TakmicenjaPage() {
+function DashboardPage() {
     _s();
     const { data: players, isLoading, isError } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$queries$2f$usePlayers$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePlayers"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "TakmicenjaPage.useEffect": ()=>{
+        "DashboardPage.useEffect": ()=>{
             if (players) {
-                console.log('players', players);
+                console.log("players", players);
             }
         }
-    }["TakmicenjaPage.useEffect"], [
+    }["DashboardPage.useEffect"], [
         players
     ]);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -151,7 +190,7 @@ function TakmicenjaPage() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                 className: "mb-6 text-xl font-bold tracking-[0.25em] text-[#e07b35] uppercase",
-                children: "Takmičenja"
+                children: "Dashboard"
             }, void 0, false, {
                 fileName: "[project]/app/takmicenja/page.tsx",
                 lineNumber: 17,
@@ -180,14 +219,14 @@ function TakmicenjaPage() {
         columnNumber: 5
     }, this);
 }
-_s(TakmicenjaPage, "oNwpTu5jPWUTQCtzXNTueF8W6wE=", false, function() {
+_s(DashboardPage, "oNwpTu5jPWUTQCtzXNTueF8W6wE=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$queries$2f$usePlayers$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePlayers"]
     ];
 });
-_c = TakmicenjaPage;
+_c = DashboardPage;
 var _c;
-__turbopack_context__.k.register(_c, "TakmicenjaPage");
+__turbopack_context__.k.register(_c, "DashboardPage");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }

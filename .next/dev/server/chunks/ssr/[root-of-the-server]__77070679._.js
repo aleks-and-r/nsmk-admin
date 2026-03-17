@@ -120,15 +120,33 @@ const __TURBOPACK__default__export__ = apiClient;
 "use strict";
 
 __turbopack_context__.s([
+    "createPlayer",
+    ()=>createPlayer,
+    "getPlayerById",
+    ()=>getPlayerById,
     "getPlayers",
     ()=>getPlayers,
     "getTopScorers",
-    ()=>getTopScorers
+    ()=>getTopScorers,
+    "updatePlayer",
+    ()=>updatePlayer
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/axios.ts [app-ssr] (ecmascript)");
 ;
 const getPlayers = async ()=>{
     const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get("players/");
+    return data;
+};
+const getPlayerById = async (id)=>{
+    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`players/${id}/`);
+    return data;
+};
+const createPlayer = async (payload)=>{
+    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].post('players/', payload);
+    return data;
+};
+const updatePlayer = async (id, payload)=>{
+    const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$axios$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].patch(`players/${id}/`, payload);
     return data;
 };
 const getTopScorers = async (leagueId)=>{
@@ -144,6 +162,8 @@ const getTopScorers = async (leagueId)=>{
 "use strict";
 
 __turbopack_context__.s([
+    "usePlayerById",
+    ()=>usePlayerById,
     "usePlayers",
     ()=>usePlayers,
     "useTopScorers",
@@ -160,6 +180,17 @@ const usePlayers = ()=>{
         ],
         queryFn: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$players$2e$service$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getPlayers"],
         staleTime: 1000 * 60 * 5
+    });
+};
+const usePlayerById = (id)=>{
+    return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$tanstack$2f$react$2d$query$2f$build$2f$modern$2f$useQuery$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useQuery"])({
+        queryKey: [
+            "players",
+            id
+        ],
+        queryFn: ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$players$2e$service$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getPlayerById"])(id),
+        staleTime: 1000 * 60 * 5,
+        enabled: !!id
     });
 };
 const useTopScorers = (leagueId)=>{
@@ -179,20 +210,20 @@ const useTopScorers = (leagueId)=>{
 
 __turbopack_context__.s([
     "default",
-    ()=>TakmicenjaPage
+    ()=>DashboardPage
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$queries$2f$usePlayers$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/queries/usePlayers.ts [app-ssr] (ecmascript)");
-'use client';
+"use client";
 ;
 ;
 ;
-function TakmicenjaPage() {
+function DashboardPage() {
     const { data: players, isLoading, isError } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$queries$2f$usePlayers$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["usePlayers"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (players) {
-            console.log('players', players);
+            console.log("players", players);
         }
     }, [
         players
@@ -202,7 +233,7 @@ function TakmicenjaPage() {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
                 className: "mb-6 text-xl font-bold tracking-[0.25em] text-[#e07b35] uppercase",
-                children: "Takmičenja"
+                children: "Dashboard"
             }, void 0, false, {
                 fileName: "[project]/app/takmicenja/page.tsx",
                 lineNumber: 17,
