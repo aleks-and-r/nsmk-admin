@@ -11,6 +11,10 @@
   --sidebar-bg: #1a2035;
   --sidebar-active-bg: #252f4a;
   --topbar-bg: #ffffff;
+  --btn-add: #22c55e;
+  --btn-export: #f59e0b;
+  --btn-download: #14b8a6;
+  --btn-edit: #0d9488;
 }
 
 /* Dark theme — mirrors colors.dark in src/lib/colors.ts */
@@ -24,6 +28,10 @@ html.dark {
   --sidebar-bg: #1a2035;
   --sidebar-active-bg: #252f4a;
   --topbar-bg: #1e2d40;
+  --btn-add: #22c55e;
+  --btn-export: #f59e0b;
+  --btn-download: #14b8a6;
+  --btn-edit: #0d9488;
 }
 
 /* Expose CSS variables as Tailwind utilities (bg-background, text-accent, …) */
@@ -37,6 +45,10 @@ html.dark {
   --color-sidebar-bg: var(--sidebar-bg);
   --color-sidebar-active-bg: var(--sidebar-active-bg);
   --color-topbar-bg: var(--topbar-bg);
+  --color-btn-add: var(--btn-add);
+  --color-btn-export: var(--btn-export);
+  --color-btn-download: var(--btn-download);
+  --color-btn-edit: var(--btn-edit);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

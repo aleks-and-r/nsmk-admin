@@ -17,7 +17,7 @@ export default function ThemeToggle() {
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-label="Toggle theme"
-      className="flex h-9 w-9 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      className="flex h-9 w-9 items-center justify-center rounded-md border border-card-border bg-card-bg text-foreground transition-colors hover:bg-black/5 dark:hover:bg-white/5"
     >
       {isDark ? (
         // Sun icon

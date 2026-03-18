@@ -18,6 +18,7 @@ export const colors = {
     cardBg: '#121e2f',
     foreground: '#e8edf3',
     cardBorder: '#1e3048',
+    topbarBg: '#1e2d40',
   },
 
   // Light theme
@@ -27,5 +28,20 @@ export const colors = {
     cardBg: '#ffffff',
     foreground: '#0d1927',
     cardBorder: '#d1d9e0',
+    topbarBg: '#ffffff',
+  },
+
+  // Theme-independent — same in both themes
+  sidebar: {
+    bg: '#1a2035',
+    activeBg: '#252f4a',
+  },
+
+  // Action button colours
+  btn: {
+    add:      '#22c55e', // bg-btn-add      — replaces green-500
+    export:   '#f59e0b', // bg-btn-export   — replaces amber-500
+    download: '#14b8a6', // bg-btn-download — replaces teal-500
+    edit:     '#0d9488', // bg-btn-edit     — replaces teal-600 (table rows + avatars)
   },
 } as const;

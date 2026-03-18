@@ -120,7 +120,7 @@ export default function DataTable<T extends { id: number | string }>({
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="p-1.5 rounded bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white transition-colors"
+            className="p-1.5 rounded bg-btn-export hover:bg-btn-export/90 disabled:opacity-60 text-white transition-colors"
             aria-label="Export"
             title="Export to CSV"
           >
@@ -142,7 +142,7 @@ export default function DataTable<T extends { id: number | string }>({
 
           {/* Import / Download icon (teal) */}
           <button
-            className="p-1.5 rounded bg-teal-500 hover:bg-teal-600 text-white transition-colors"
+            className="p-1.5 rounded bg-btn-download hover:bg-btn-download/90 text-white transition-colors"
             aria-label="Import / Download"
             title="Import / Download CSV"
           >
@@ -283,7 +283,7 @@ export default function DataTable<T extends { id: number | string }>({
                       <td className="px-4 py-3">
                         <Link
                           href={`${editBasePath}/${rowIdValue}`}
-                          className="inline-flex items-center justify-center w-7 h-7 rounded bg-teal-600 hover:bg-teal-700 text-white transition-colors"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded bg-btn-edit hover:bg-btn-edit/90 text-white transition-colors"
                           aria-label="Edit"
                         >
                           <svg

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser } from '@/hooks/queries/useCurrentUser';
+import ThemeToggle from '@/components/layout/ThemeToggle';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -49,12 +50,13 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
       {/* Right: icon buttons + user dropdown */}
       <div className="flex items-center gap-2">
         {/* Icon buttons (placeholder) */}
-        <button className="p-1.5 rounded bg-green-500 hover:bg-green-600 transition-colors text-white" aria-label="Add">
+        <ThemeToggle />
+        <button className="p-1.5 rounded bg-btn-add hover:bg-btn-add/90 transition-colors text-white" aria-label="Add">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </button>
-        <button className="p-1.5 rounded bg-green-500 hover:bg-green-600 transition-colors text-white" aria-label="Grid">
+        <button className="p-1.5 rounded bg-btn-add hover:bg-btn-add/90 transition-colors text-white" aria-label="Grid">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
           </svg>
@@ -67,7 +69,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
             className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-black/5 transition-colors"
           >
             {/* Avatar */}
-            <div className="w-7 h-7 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-semibold">
+            <div className="w-7 h-7 rounded-full bg-btn-edit flex items-center justify-center text-white text-xs font-semibold">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
               </svg>
@@ -88,7 +90,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
           {dropdownOpen && (
             <div className="absolute right-0 top-full mt-1 w-52 bg-topbar-bg border border-card-border rounded-lg shadow-lg z-50 py-1 overflow-hidden">
               {/* Avatar header */}
-              <div className="flex justify-center py-4 bg-teal-600">
+              <div className="flex justify-center py-4 bg-btn-edit">
                 <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />

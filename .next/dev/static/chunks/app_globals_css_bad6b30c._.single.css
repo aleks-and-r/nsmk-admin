@@ -32,20 +32,11 @@
     --color-red-200: #ffcaca;
     --color-red-400: #ff6568;
     --color-red-500: #fb2c36;
-    --color-amber-500: #f99c00;
-    --color-amber-600: #dd7400;
-    --color-green-500: #00c758;
     --color-green-600: #00a544;
-    --color-teal-500: #00baa7;
-    --color-teal-600: #009588;
-    --color-teal-700: #00776e;
     --color-zinc-50: #fafafa;
-    --color-zinc-100: #f4f4f5;
     --color-zinc-200: #e4e4e7;
-    --color-zinc-300: #d4d4d8;
     --color-zinc-400: #9f9fa9;
     --color-zinc-500: #71717b;
-    --color-zinc-700: #3f3f46;
     --color-zinc-800: #27272a;
     --color-zinc-900: #18181b;
     --color-black: #000;
@@ -90,20 +81,11 @@
       --color-red-200: lab(86.017% 19.8815 7.75869);
       --color-red-400: lab(63.7053% 60.745 31.3109);
       --color-red-500: lab(55.4814% 75.0732 48.8528);
-      --color-amber-500: lab(72.7183% 31.8672 97.9407);
-      --color-amber-600: lab(60.3514% 40.5624 87.1228);
-      --color-green-500: lab(70.5521% -66.5147 45.8073);
       --color-green-600: lab(59.0978% -58.6621 41.2579);
-      --color-teal-500: lab(67.3859% -49.0983 -2.63511);
-      --color-teal-600: lab(55.0223% -41.0774 -3.90277);
-      --color-teal-700: lab(44.4134% -33.1436 -4.22149);
       --color-zinc-50: lab(98.26% 0 0);
-      --color-zinc-100: lab(96.1634% .0993311 -.364041);
       --color-zinc-200: lab(90.6853% .399232 -1.45452);
-      --color-zinc-300: lab(84.9837% .601262 -2.17986);
       --color-zinc-400: lab(65.6464% 1.53497 -5.42429);
       --color-zinc-500: lab(47.8878% 1.65477 -5.77283);
-      --color-zinc-700: lab(26.8019% 1.35387 -4.68303);
       --color-zinc-800: lab(15.7305% .613764 -2.16959);
       --color-zinc-900: lab(8.30603% .618205 -2.16572);
     }
@@ -535,10 +517,6 @@
     width: calc(var(--spacing) * 9);
   }
 
-  .w-12 {
-    width: calc(var(--spacing) * 12);
-  }
-
   .w-14 {
     width: calc(var(--spacing) * 14);
   }
@@ -790,12 +768,24 @@
     background-color: var(--accent);
   }
 
-  .bg-amber-500 {
-    background-color: var(--color-amber-500);
-  }
-
   .bg-background {
     background-color: var(--background);
+  }
+
+  .bg-btn-add {
+    background-color: var(--btn-add);
+  }
+
+  .bg-btn-download {
+    background-color: var(--btn-download);
+  }
+
+  .bg-btn-edit {
+    background-color: var(--btn-edit);
+  }
+
+  .bg-btn-export {
+    background-color: var(--btn-export);
   }
 
   .bg-card-bg {
@@ -806,24 +796,12 @@
     background-color: var(--card-border);
   }
 
-  .bg-green-500 {
-    background-color: var(--color-green-500);
-  }
-
   .bg-sidebar-active-bg {
     background-color: var(--sidebar-active-bg);
   }
 
   .bg-sidebar-bg {
     background-color: var(--sidebar-bg);
-  }
-
-  .bg-teal-500 {
-    background-color: var(--color-teal-500);
-  }
-
-  .bg-teal-600 {
-    background-color: var(--color-teal-600);
   }
 
   .bg-topbar-bg {
@@ -1143,10 +1121,6 @@
     color: var(--color-zinc-500);
   }
 
-  .text-zinc-700 {
-    color: var(--color-zinc-700);
-  }
-
   .text-zinc-900 {
     color: var(--color-zinc-900);
   }
@@ -1232,12 +1206,6 @@
   }
 
   @media (hover: hover) {
-    .hover\:bg-amber-600:hover {
-      background-color: var(--color-amber-600);
-    }
-  }
-
-  @media (hover: hover) {
     .hover\:bg-black\/5:hover {
       background-color: #0000000d;
     }
@@ -1262,26 +1230,56 @@
   }
 
   @media (hover: hover) {
-    .hover\:bg-green-600:hover {
-      background-color: var(--color-green-600);
+    .hover\:bg-btn-add\/90:hover {
+      background-color: var(--btn-add);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-btn-add\/90:hover {
+        background-color: color-mix(in oklab, var(--btn-add) 90%, transparent);
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-btn-download\/90:hover {
+      background-color: var(--btn-download);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-btn-download\/90:hover {
+        background-color: color-mix(in oklab, var(--btn-download) 90%, transparent);
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-btn-edit\/90:hover {
+      background-color: var(--btn-edit);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-btn-edit\/90:hover {
+        background-color: color-mix(in oklab, var(--btn-edit) 90%, transparent);
+      }
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:bg-btn-export\/90:hover {
+      background-color: var(--btn-export);
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-btn-export\/90:hover {
+        background-color: color-mix(in oklab, var(--btn-export) 90%, transparent);
+      }
     }
   }
 
   @media (hover: hover) {
     .hover\:bg-red-50:hover {
       background-color: var(--color-red-50);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:bg-teal-600:hover {
-      background-color: var(--color-teal-600);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:bg-teal-700:hover {
-      background-color: var(--color-teal-700);
     }
   }
 
@@ -1294,12 +1292,6 @@
       .hover\:bg-white\/5:hover {
         background-color: color-mix(in oklab, var(--color-white) 5%, transparent);
       }
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:bg-zinc-100:hover {
-      background-color: var(--color-zinc-100);
     }
   }
 
@@ -1368,12 +1360,6 @@
   }
 
   @media (prefers-color-scheme: dark) {
-    .dark\:border-zinc-700 {
-      border-color: var(--color-zinc-700);
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
     .dark\:border-zinc-800 {
       border-color: var(--color-zinc-800);
     }
@@ -1392,15 +1378,15 @@
   }
 
   @media (prefers-color-scheme: dark) {
-    .dark\:text-zinc-300 {
-      color: var(--color-zinc-300);
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
     @media (hover: hover) {
-      .dark\:hover\:bg-zinc-800:hover {
-        background-color: var(--color-zinc-800);
+      .dark\:hover\:bg-white\/5:hover {
+        background-color: #ffffff0d;
+      }
+
+      @supports (color: color-mix(in lab, red, red)) {
+        .dark\:hover\:bg-white\/5:hover {
+          background-color: color-mix(in oklab, var(--color-white) 5%, transparent);
+        }
       }
     }
   }
@@ -1416,6 +1402,10 @@
   --sidebar-bg: #1a2035;
   --sidebar-active-bg: #252f4a;
   --topbar-bg: #fff;
+  --btn-add: #22c55e;
+  --btn-export: #f59e0b;
+  --btn-download: #14b8a6;
+  --btn-edit: #0d9488;
 }
 
 html.dark {
@@ -1428,6 +1418,10 @@ html.dark {
   --sidebar-bg: #1a2035;
   --sidebar-active-bg: #252f4a;
   --topbar-bg: #1e2d40;
+  --btn-add: #22c55e;
+  --btn-export: #f59e0b;
+  --btn-download: #14b8a6;
+  --btn-edit: #0d9488;
 }
 
 body {
