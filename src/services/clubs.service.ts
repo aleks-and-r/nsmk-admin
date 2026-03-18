@@ -1,4 +1,4 @@
-import apiClient from '@/lib/axios';
+import apiClient from "@/lib/axios";
 
 export interface Club {
   id: string;
@@ -17,8 +17,8 @@ export interface ClubDetail {
   name: string;
   short_name: string;
   owner: string;
-  email: string;
-  phone: string;
+  contact_email: string | null;
+  contact_phone: string | null;
   website: string;
   facebook_url: string;
   twitter_url: string;
@@ -26,7 +26,7 @@ export interface ClubDetail {
 }
 
 export const getClubs = async (): Promise<Club[]> => {
-  const { data } = await apiClient.get<Club[]>('clubs/');
+  const { data } = await apiClient.get<Club[]>("clubs/");
   return data;
 };
 
@@ -38,7 +38,7 @@ export const getClubById = async (id: string): Promise<ClubDetail> => {
 export const createClub = async (
   payload: FormData | Partial<ClubDetail>,
 ): Promise<ClubDetail> => {
-  const { data } = await apiClient.post<ClubDetail>('clubs/', payload);
+  const { data } = await apiClient.post<ClubDetail>("clubs/", payload);
   return data;
 };
 

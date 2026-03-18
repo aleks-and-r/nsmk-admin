@@ -13,8 +13,8 @@ interface FormState {
   name: string;
   short_name: string;
   owner: string;
-  email: string;
-  phone: string;
+  contact_email: string;
+  contact_phone: string;
   website: string;
   facebook_url: string;
   twitter_url: string;
@@ -25,8 +25,8 @@ const EMPTY: FormState = {
   name: "",
   short_name: "",
   owner: "",
-  email: "",
-  phone: "",
+  contact_email: "",
+  contact_phone: "",
   website: "",
   facebook_url: "",
   twitter_url: "",
@@ -57,12 +57,13 @@ export default function ClubPage({
 
   useEffect(() => {
     if (club) {
+      console.log(club);
       setForm({
         name: club.name ?? "",
         short_name: club.short_name ?? "",
         owner: club.owner ?? "",
-        email: club.email ?? "",
-        phone: club.phone ?? "",
+        contact_email: club.contact_email ?? "",
+        contact_phone: club.contact_phone ?? "",
         website: club.website ?? "",
         facebook_url: club.facebook_url ?? "",
         twitter_url: club.twitter_url ?? "",
@@ -183,8 +184,8 @@ export default function ClubPage({
         <Field label="Email">
           <input
             type="email"
-            value={form.email}
-            onChange={(e) => handleChange("email", e.target.value)}
+            value={form.contact_email ?? ""}
+            onChange={(e) => handleChange("contact_email", e.target.value)}
             className={inputCls()}
           />
         </Field>
@@ -194,8 +195,8 @@ export default function ClubPage({
             <span className="flex items-center gap-1.5 px-3 py-2 bg-background border border-r-0 border-card-border rounded-l text-sm text-foreground/70 whitespace-nowrap select-none"></span>
             <input
               type="tel"
-              value={form.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
+              value={form.contact_phone ?? ""}
+              onChange={(e) => handleChange("contact_phone", e.target.value)}
               placeholder="Enter a phone number"
               className={`${inputCls()} rounded-l-none`}
             />
