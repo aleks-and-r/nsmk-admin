@@ -40,7 +40,7 @@ export interface LeaguePayload {
   season: number;
   name: string;
   age_group: string;
-  reference_birth_year: number;
+  reference_birth_year?: number;
   points_for_win: number;
   points_for_loss: number;
   points_for_forfeit: number;
