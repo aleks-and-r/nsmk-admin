@@ -2,7 +2,6 @@ import apiClient from '@/lib/axios';
 
 export interface CoachDetail {
   id: number;
-  short_id: string;
   first_name: string;
   last_name: string;
   middle_name: string;

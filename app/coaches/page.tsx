@@ -4,7 +4,6 @@ import DataTable from "@/components/admin/DataTable";
 
 interface Coach {
   id: number;
-  short_id: string;
   first_name: string;
   last_name: string;
   birth_year: number;
@@ -26,7 +25,7 @@ export default function CoachesPage() {
       url="coaches/"
       columns={coachColumns}
       editBasePath="/coaches"
-      idKey="short_id"
+      idKey="id"
     />
   );
 }
