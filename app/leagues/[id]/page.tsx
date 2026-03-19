@@ -5,7 +5,11 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLeague } from "@/hooks/queries/useLeagues";
-import { createLeague, updateLeague, type LeaguePayload } from "@/services/leagues.service";
+import {
+  createLeague,
+  updateLeague,
+  type LeaguePayload,
+} from "@/services/leagues.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
 
 const AGE_GROUP_OPTIONS = ["U8", "U10", "U12", "U14", "U16", "U18", "Senior"];
@@ -49,7 +53,9 @@ export default function LeaguePage({
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
 
   useEffect(() => {
     if (league) {
@@ -89,16 +95,19 @@ export default function LeaguePage({
     setSaving(true);
     setSaveStatus("idle");
     try {
-      const payload = {
+      const payload: LeaguePayload = {
         name: form.name,
         age_group: form.age_group,
         season: Number(form.season),
-        reference_birth_year: form.reference_birth_year ? Number(form.reference_birth_year) : undefined,
+        ...(form.reference_birth_year &&
+          form.reference_birth_year.trim() && {
+            reference_birth_year: Number(form.reference_birth_year),
+          }),
         points_for_win: Number(form.points_for_win),
         points_for_loss: Number(form.points_for_loss),
         points_for_forfeit: Number(form.points_for_forfeit),
         is_active: form.is_active,
-      };
+      } as LeaguePayload;
 
       if (isNew) {
         await createLeague(payload);
@@ -132,7 +141,9 @@ export default function LeaguePage({
   }
 
   const title = isNew ? "Create league" : "Edit league";
-  const subtitle = isNew ? "" : `${league?.name ?? ""} — ${league?.season_name ?? ""}`;
+  const subtitle = isNew
+    ? ""
+    : `${league?.name ?? ""} — ${league?.season_name ?? ""}`;
 
   return (
     <div className="max-w-2xl">
@@ -182,7 +193,9 @@ export default function LeaguePage({
           <input
             type="number"
             value={form.reference_birth_year}
-            onChange={(e) => handleChange("reference_birth_year", e.target.value)}
+            onChange={(e) =>
+              handleChange("reference_birth_year", e.target.value)
+            }
             className={inputCls()}
             min={1990}
             max={2030}
@@ -212,7 +225,9 @@ export default function LeaguePage({
             <input
               type="number"
               value={form.points_for_forfeit}
-              onChange={(e) => handleChange("points_for_forfeit", e.target.value)}
+              onChange={(e) =>
+                handleChange("points_for_forfeit", e.target.value)
+              }
               className={inputCls()}
               min={0}
             />
@@ -243,11 +258,15 @@ export default function LeaguePage({
 
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
-              {isNew ? "Created successfully. Redirecting…" : "Saved successfully."}
+              {isNew
+                ? "Created successfully. Redirecting…"
+                : "Saved successfully."}
             </span>
           )}
           {saveStatus === "error" && (
-            <span className="text-sm text-red-500">Failed to save. Please try again.</span>
+            <span className="text-sm text-red-500">
+              Failed to save. Please try again.
+            </span>
           )}
         </div>
       </div>
@@ -279,8 +298,12 @@ export default function LeaguePage({
                   key={team.id}
                   className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-foreground font-medium">{team.name}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{team.club_name}</td>
+                  <td className="px-4 py-3 text-sm text-foreground font-medium">
+                    {team.name}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground">
+                    {team.club_name}
+                  </td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
