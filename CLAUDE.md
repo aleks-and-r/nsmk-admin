@@ -46,7 +46,6 @@ No test framework is configured.
 - `/clubs` — Clubs list with stats
 - `/matches` — Match results
 - `/players` — Player database
-- `/dashboard` — Competitions (stub)
 - `/o_nama` — About page
 
 Several navigation links in `Navigation.tsx` point to unimplemented routes (schedule, gallery, bulletins, documents, contact).
