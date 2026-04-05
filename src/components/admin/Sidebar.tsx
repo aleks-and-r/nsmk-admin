@@ -77,7 +77,6 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         )}
       </div>
 
-      {/* Nav items */}
       <nav className="flex-1 overflow-y-auto py-2">
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
