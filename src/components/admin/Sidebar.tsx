@@ -34,6 +34,10 @@ const NAV_ITEMS: NavItem[] = [
     label: "Matches",
   },
   {
+    href: "/games",
+    label: "Games",
+  },
+  {
     href: "/venues",
     label: "Venues",
   },

@@ -3,13 +3,11 @@ import type { PaginatedResponse } from '@/types/api';
 
 export interface LeagueTeam {
   id: number;
-  club: number;
-  age_group_label: string;
-  season: number;
-  name: string;
-  is_active: boolean;
-  club_name: string;
-  season_name: string;
+  league: number;
+  team: number;
+  in_competition: boolean;
+  is_withdrawn: boolean;
+  team_name: string;
 }
 
 export interface League {

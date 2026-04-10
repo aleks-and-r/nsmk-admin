@@ -282,7 +282,7 @@ export default function LeaguePage({
           <table className="w-full">
             <thead>
               <tr className="border-b border-card-border">
-                {["Name", "Club", "Active"].map((h) => (
+                {["Name", "In Competition", "Withdrawn"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
@@ -299,20 +299,28 @@ export default function LeaguePage({
                   className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
                 >
                   <td className="px-4 py-3 text-sm text-foreground font-medium">
-                    {team.name}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-foreground">
-                    {team.club_name}
+                    {team.team_name}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        team.is_active
+                        team.in_competition
                           ? "bg-green-500/10 text-green-600"
                           : "bg-foreground/10 text-foreground/50"
                       }`}
                     >
-                      {team.is_active ? "Active" : "Inactive"}
+                      {team.in_competition ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                        team.is_withdrawn
+                          ? "bg-red-500/10 text-red-500"
+                          : "bg-foreground/10 text-foreground/50"
+                      }`}
+                    >
+                      {team.is_withdrawn ? "Yes" : "No"}
                     </span>
                   </td>
                 </tr>
