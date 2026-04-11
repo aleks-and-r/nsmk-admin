@@ -5,7 +5,7 @@ import { useEffect, useState, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePlayerById } from "@/hooks/queries/usePlayers";
-import { useTeams } from "@/hooks/queries/useTeams";
+import { useTeams, usePlayerTeamMemberships } from "@/hooks/queries/useTeams";
 import { createPlayer, updatePlayer } from "@/services/players.service";
 import {
   createTeamMembership,
@@ -74,6 +74,8 @@ export default function PlayerPage({
 
   const { data: player, isLoading, isError } = usePlayerById(isNew ? "" : id);
   const { data: teamsData } = useTeams();
+  const { data: existingMemberships, refetch: refetchMemberships } =
+    usePlayerTeamMemberships(isNew ? undefined : Number(id));
   const queryClient = useQueryClient();
 
   // Player form state
@@ -215,6 +217,7 @@ export default function PlayerPage({
       await createTeamMembership(payload);
       setMembershipStatus("success");
       setMembership(EMPTY_MEMBERSHIP);
+      await refetchMemberships();
     } catch (err) {
       setMembershipStatus("error");
       const data = (err as { response?: { data?: Record<string, unknown> } })
@@ -370,6 +373,62 @@ export default function PlayerPage({
           <h2 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider">
             Assign to Team
           </h2>
+
+          {/* Existing memberships table */}
+          {existingMemberships && existingMemberships.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-foreground/50 uppercase tracking-wider">
+                Current memberships
+              </p>
+              <div className="overflow-hidden rounded border border-card-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-card-border bg-background text-xs font-medium text-foreground/50 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left">Team</th>
+                      <th className="px-3 py-2 text-left">No.</th>
+                      <th className="px-3 py-2 text-left">Active</th>
+                      <th className="px-3 py-2 text-left">Loan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {existingMemberships.map((m) => (
+                      <tr
+                        key={m.id}
+                        className="border-b border-card-border last:border-0"
+                      >
+                        <td className="px-3 py-2 text-foreground">
+                          {m.team_name}
+                        </td>
+                        <td className="px-3 py-2 text-foreground">
+                          {m.number ?? "—"}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${
+                              m.is_active
+                                ? "bg-green-500/15 text-green-600"
+                                : "bg-foreground/10 text-foreground/50"
+                            }`}
+                          >
+                            {m.is_active ? "Yes" : "No"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-foreground/60 text-xs">
+                          {m.loan ? "Yes" : "No"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs font-medium text-foreground/50 uppercase tracking-wider">
+            {existingMemberships && existingMemberships.length > 0
+              ? "Add another team"
+              : "Add to a team"}
+          </p>
 
           <Field label="Team" required error={membershipErrors.team}>
             <SearchableSelect

@@ -113,7 +113,39 @@ export const updateGameScore = async (
   return data;
 };
 
-export const getGameStats = async (id: string): Promise<GameDetail> => {
-  const { data } = await apiClient.get<GameDetail>(`games/${id}/stats/`);
+export interface GameStat {
+  id: number;
+  player: number;
+  player_name: string;
+  team: number;
+  team_name: string;
+  ft_made: number;
+  two_pt_made: number;
+  three_pt_made: number;
+  points: number;
+}
+
+export interface GameStatPayload {
+  player: number;
+  team: number;
+  ft_made: number;
+  two_pt_made: number;
+  three_pt_made: number;
+}
+
+export const getGameStats = async (id: string): Promise<PaginatedResponse<GameStat>> => {
+  const { data } = await apiClient.get<PaginatedResponse<GameStat>>(`games/${id}/stats/`);
+  return data;
+};
+
+export const deleteGame = async (id: string): Promise<void> => {
+  await apiClient.delete(`games/${id}/`);
+};
+
+export const importGameStats = async (
+  id: string,
+  payload: GameStatPayload[],
+): Promise<unknown> => {
+  const { data } = await apiClient.post(`games/${id}/import-stats/`, payload);
   return data;
 };

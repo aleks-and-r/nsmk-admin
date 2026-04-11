@@ -32,3 +32,12 @@ export const createTeamMembership = async (
   );
   return data;
 };
+
+export const getTeamMembershipsByPlayer = async (
+  playerId: number,
+): Promise<TeamMembership[]> => {
+  const { data } = await apiClient.get<TeamMembership[] | { results: TeamMembership[] }>(
+    `team-memberships/?player=${playerId}`,
+  );
+  return Array.isArray(data) ? data : data.results;
+};

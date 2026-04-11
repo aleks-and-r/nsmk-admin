@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { downloadExport } from "@/lib/download";
 import { usePaginatedData } from "@/hooks/queries/usePaginatedData";
@@ -18,6 +18,9 @@ interface DataTableProps<T extends { id: number | string }> {
   columns: TableColumn<T>[];
   editBasePath: string;
   idKey?: string;
+  onDelete?: (id: string) => void;
+  extraActions?: (row: T) => ReactNode;
+  onImport?: (file: File) => Promise<void>;
 }
 
 function getCellValue<T>(row: T, key: string): unknown {
@@ -35,11 +38,28 @@ export default function DataTable<T extends { id: number | string }>({
   columns,
   editBasePath,
   idKey = "id",
+  onDelete,
+  extraActions,
+  onImport,
 }: DataTableProps<T>) {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !onImport) return;
+    setImporting(true);
+    try {
+      await onImport(file);
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  }
 
   async function handleExport() {
     setExporting(true);
@@ -140,41 +160,48 @@ export default function DataTable<T extends { id: number | string }>({
             </svg>
           </button>
 
-          {/* Import / Download icon (teal) */}
+          {/* Import icon (teal) */}
           <button
-            className="p-1.5 rounded bg-btn-download hover:bg-btn-download/90 text-white transition-colors"
-            aria-label="Import / Download"
-            title="Import / Download CSV"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing || !onImport}
+            className="p-1.5 rounded bg-btn-download hover:bg-btn-download/90 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+            aria-label="Import CSV"
+            title={onImport ? "Import CSV" : "Import not available"}
           >
-            <div className="flex items-center gap-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 12l-4-4-4 4"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 20V8"
-                />
-              </svg>
-            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 12l-4-4-4 4"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 20V8"
+              />
+            </svg>
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.xlsx,.xls"
+            className="hidden"
+            onChange={handleImportFile}
+          />
 
           {/* Dropdown chevron */}
           <button
@@ -281,26 +308,52 @@ export default function DataTable<T extends { id: number | string }>({
                         );
                       })}
                       <td className="px-4 py-3">
-                        <Link
-                          href={`${editBasePath}/${rowIdValue}`}
-                          className="inline-flex items-center justify-center w-7 h-7 rounded bg-btn-edit hover:bg-btn-edit/90 text-white transition-colors"
-                          aria-label="Edit"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-3.5 h-3.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                        <div className="flex items-center gap-1.5">
+                          {extraActions && extraActions(row)}
+                          <Link
+                            href={`${editBasePath}/${rowIdValue}`}
+                            className="inline-flex items-center justify-center w-7 h-7 rounded bg-btn-edit hover:bg-btn-edit/90 text-white transition-colors"
+                            aria-label="Edit"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            />
-                          </svg>
-                        </Link>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </Link>
+                          {onDelete && (
+                            <button
+                              type="button"
+                              onClick={() => onDelete(rowIdValue)}
+                              className="inline-flex items-center justify-center w-7 h-7 rounded bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+                              aria-label="Delete"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-3.5 h-3.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

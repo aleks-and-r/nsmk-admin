@@ -23,6 +23,7 @@ export interface PlayerDetail {
   club: number | null;
   club_name: string | null;
   is_active: boolean;
+  clubs: { id: number; name: string }[];
 }
 
 export const getPlayers = async (): Promise<Player[]> => {
