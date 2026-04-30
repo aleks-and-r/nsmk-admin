@@ -115,6 +115,7 @@ export const updateGameScore = async (
 
 export interface GameStat {
   id: number;
+  game: number;
   player: number;
   player_name: string;
   team: number;
@@ -122,30 +123,38 @@ export interface GameStat {
   ft_made: number;
   two_pt_made: number;
   three_pt_made: number;
+  fouls: number;
   points: number;
 }
 
-export interface GameStatPayload {
+export interface PlayerGameStatPayload {
+  game: number;
   player: number;
   team: number;
   ft_made: number;
   two_pt_made: number;
   three_pt_made: number;
+  fouls: number;
 }
 
-export const getGameStats = async (id: string): Promise<PaginatedResponse<GameStat>> => {
-  const { data } = await apiClient.get<PaginatedResponse<GameStat>>(`games/${id}/stats/`);
+export const getGameStats = async (gameId: string): Promise<PaginatedResponse<GameStat>> => {
+  const { data } = await apiClient.get<PaginatedResponse<GameStat>>('player-game-stats/', {
+    params: { game: gameId },
+  });
   return data;
+};
+
+export const createPlayerGameStat = async (
+  payload: PlayerGameStatPayload,
+): Promise<GameStat> => {
+  const { data } = await apiClient.post<GameStat>('player-game-stats/', payload);
+  return data;
+};
+
+export const deletePlayerGameStat = async (id: number): Promise<void> => {
+  await apiClient.delete(`player-game-stats/${id}/`);
 };
 
 export const deleteGame = async (id: string): Promise<void> => {
   await apiClient.delete(`games/${id}/`);
-};
-
-export const importGameStats = async (
-  id: string,
-  payload: GameStatPayload[],
-): Promise<unknown> => {
-  const { data } = await apiClient.post(`games/${id}/import-stats/`, payload);
-  return data;
 };

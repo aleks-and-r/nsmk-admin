@@ -81,3 +81,36 @@ export const getLeagueStandings = async (id: string): Promise<unknown> => {
   const { data } = await apiClient.get(`leagues/${id}/standings/`);
   return data;
 };
+
+export interface TeamStatsSummary {
+  team_name: string;
+  season_name: string;
+  league_name: string;
+  games_played: number;
+  points: number;
+  ft_made: number;
+  two_pt_made: number;
+  three_pt_made: number;
+  fouls: number;
+  ppg: number;
+  ft_made_pg: number;
+  two_pt_made_pg: number;
+  three_pt_made_pg: number;
+  fouls_pg: number;
+}
+
+export interface RefreshSummariesResponse {
+  detail: string;
+  league_id: number;
+  skipped: boolean;
+}
+
+export const getLeagueTeamStats = async (leagueId: string): Promise<TeamStatsSummary[]> => {
+  const { data } = await apiClient.get<TeamStatsSummary[]>(`leagues/${leagueId}/team-stats/`);
+  return data;
+};
+
+export const refreshLeagueSummaries = async (leagueId: string): Promise<RefreshSummariesResponse> => {
+  const { data } = await apiClient.post<RefreshSummariesResponse>(`leagues/${leagueId}/refresh-summaries/`);
+  return data;
+};

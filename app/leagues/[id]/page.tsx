@@ -4,10 +4,11 @@ import type { ReactNode } from "react";
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLeague } from "@/hooks/queries/useLeagues";
+import { useLeague, useLeagueTeamStats } from "@/hooks/queries/useLeagues";
 import {
   createLeague,
   updateLeague,
+  refreshLeagueSummaries,
   type LeaguePayload,
 } from "@/services/leagues.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
@@ -49,13 +50,14 @@ export default function LeaguePage({
 
   const queryClient = useQueryClient();
   const { data: league, isLoading, isError } = useLeague(isNew ? "" : id);
+  const { data: teamStats, isLoading: statsLoading } = useLeagueTeamStats(isNew ? "" : id);
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
-    "idle",
-  );
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshStatus, setRefreshStatus] = useState<"idle" | "success" | "skipped" | "error">("idle");
 
   useEffect(() => {
     if (league) {
@@ -124,6 +126,20 @@ export default function LeaguePage({
       setSaveStatus("error");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    setRefreshStatus("idle");
+    try {
+      const result = await refreshLeagueSummaries(id);
+      setRefreshStatus(result.skipped ? "skipped" : "success");
+      await queryClient.invalidateQueries({ queryKey: ["leagues", id, "team-stats"] });
+    } catch {
+      setRefreshStatus("error");
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -327,6 +343,73 @@ export default function LeaguePage({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Team Stats section */}
+      {!isNew && (
+        <div className="mt-6 bg-card-bg border border-card-border rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-card-border flex items-center justify-between gap-4">
+            <h2 className="text-sm font-semibold text-foreground">Team Stats</h2>
+            <div className="flex items-center gap-3">
+              {refreshStatus === "success" && (
+                <span className="text-xs text-green-600">Summaries refreshed.</span>
+              )}
+              {refreshStatus === "skipped" && (
+                <span className="text-xs text-amber-500">Skipped — league has no season.</span>
+              )}
+              {refreshStatus === "error" && (
+                <span className="text-xs text-red-500">Refresh failed.</span>
+              )}
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="px-3 py-1.5 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-xs transition-colors"
+              >
+                {refreshing ? "Refreshing…" : "Refresh Summaries"}
+              </button>
+            </div>
+          </div>
+
+          {statsLoading ? (
+            <div className="px-4 py-3 space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-4 rounded bg-card-border animate-pulse" />
+              ))}
+            </div>
+          ) : !teamStats || teamStats.length === 0 ? (
+            <p className="px-6 py-4 text-sm text-foreground/50">No stats yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-card-border">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50">Team</th>
+                    {["GP", "PTS", "PPG", "2PM", "3PM", "FTM", "Fouls/G"].map((h) => (
+                      <th key={h} className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-foreground/50">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamStats.map((row, i) => (
+                    <tr key={i} className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors">
+                      <td className="px-4 py-3 text-sm text-foreground font-medium">{row.team_name}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.games_played}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.points}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.ppg.toFixed(1)}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.two_pt_made}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.three_pt_made}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.ft_made}</td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.fouls_pg.toFixed(1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

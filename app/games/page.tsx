@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import DataTable from "@/components/admin/DataTable";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import type { GameStatus } from "@/services/games.service";
-import { deleteGame, importGameStats } from "@/services/games.service";
+import { deleteGame, createPlayerGameStat, deletePlayerGameStat } from "@/services/games.service";
 import { useGameStats } from "@/hooks/queries/useGames";
 import { useTeams } from "@/hooks/queries/useTeams";
+import { usePaginatedData } from "@/hooks/queries/usePaginatedData";
+import type { PlayerDetail } from "@/services/players.service";
 
 interface GameRow {
   id: number;
@@ -27,6 +29,7 @@ interface StatForm {
   ft_made: string;
   two_pt_made: string;
   three_pt_made: string;
+  fouls: string;
 }
 
 const EMPTY_STAT_FORM: StatForm = {
@@ -35,6 +38,7 @@ const EMPTY_STAT_FORM: StatForm = {
   ft_made: "0",
   two_pt_made: "0",
   three_pt_made: "0",
+  fouls: "0",
 };
 
 function formatDate(value: unknown): string {
@@ -116,6 +120,7 @@ export default function GamesPage() {
   const [statSaving, setStatSaving] = useState(false);
   const [statError, setStatError] = useState("");
   const [statSuccess, setStatSuccess] = useState(false);
+  const [deletingStatId, setDeletingStatId] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
   const { data: statsData, refetch: refetchStats, isLoading: statsLoading } =
@@ -157,7 +162,7 @@ export default function GamesPage() {
   async function handleAddStat() {
     if (!statsGameId) return;
     if (!statForm.player) {
-      setStatError("Player ID is required.");
+      setStatError("Player is required.");
       return;
     }
     if (!statForm.team) {
@@ -168,15 +173,15 @@ export default function GamesPage() {
     setStatError("");
     setStatSuccess(false);
     try {
-      await importGameStats(statsGameId, [
-        {
-          player: Number(statForm.player),
-          team: Number(statForm.team),
-          ft_made: Number(statForm.ft_made) || 0,
-          two_pt_made: Number(statForm.two_pt_made) || 0,
-          three_pt_made: Number(statForm.three_pt_made) || 0,
-        },
-      ]);
+      await createPlayerGameStat({
+        game: Number(statsGameId),
+        player: Number(statForm.player),
+        team: Number(statForm.team),
+        ft_made: Number(statForm.ft_made) || 0,
+        two_pt_made: Number(statForm.two_pt_made) || 0,
+        three_pt_made: Number(statForm.three_pt_made) || 0,
+        fouls: Number(statForm.fouls) || 0,
+      });
       setStatSuccess(true);
       setStatForm(EMPTY_STAT_FORM);
       await refetchStats();
@@ -184,6 +189,16 @@ export default function GamesPage() {
       setStatError("Failed to add stats. Please try again.");
     } finally {
       setStatSaving(false);
+    }
+  }
+
+  async function handleDeleteStat(statId: number) {
+    setDeletingStatId(statId);
+    try {
+      await deletePlayerGameStat(statId);
+      await refetchStats();
+    } finally {
+      setDeletingStatId(null);
     }
   }
 
@@ -312,9 +327,9 @@ export default function GamesPage() {
                             <th className="px-3 py-2 text-right">FT</th>
                             <th className="px-3 py-2 text-right">2PT</th>
                             <th className="px-3 py-2 text-right">3PT</th>
-                            <th className="px-3 py-2 text-right font-bold">
-                              PTS
-                            </th>
+                            <th className="px-3 py-2 text-right">Fouls</th>
+                            <th className="px-3 py-2 text-right font-bold">PTS</th>
+                            <th className="px-3 py-2 w-8" />
                           </tr>
                         </thead>
                         <tbody>
@@ -338,8 +353,24 @@ export default function GamesPage() {
                               <td className="px-3 py-2 text-right text-foreground/70">
                                 {s.three_pt_made}
                               </td>
+                              <td className="px-3 py-2 text-right text-foreground/70">
+                                {s.fouls}
+                              </td>
                               <td className="px-3 py-2 text-right font-semibold text-foreground">
                                 {s.points}
+                              </td>
+                              <td className="px-3 py-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteStat(s.id)}
+                                  disabled={deletingStatId === s.id}
+                                  className="text-foreground/30 hover:text-red-500 disabled:opacity-40 transition-colors"
+                                  aria-label="Delete stat"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -358,17 +389,11 @@ export default function GamesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Player ID <span className="text-red-500">*</span>
+                      Player <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="number"
+                    <PlayerCombobox
                       value={statForm.player}
-                      onChange={(e) =>
-                        setStatForm((f) => ({ ...f, player: e.target.value }))
-                      }
-                      className="w-full px-3 py-2 bg-background border border-card-border rounded text-sm text-foreground focus:ring-2 focus:ring-accent focus:outline-none"
-                      min={1}
-                      placeholder="e.g. 583"
+                      onChange={(id) => setStatForm((f) => ({ ...f, player: id }))}
                     />
                   </div>
 
@@ -393,7 +418,7 @@ export default function GamesPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Free Throws
@@ -444,6 +469,21 @@ export default function GamesPage() {
                       min={0}
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Fouls
+                    </label>
+                    <input
+                      type="number"
+                      value={statForm.fouls}
+                      onChange={(e) =>
+                        setStatForm((f) => ({ ...f, fouls: e.target.value }))
+                      }
+                      className="w-full px-3 py-2 bg-background border border-card-border rounded text-sm text-foreground focus:ring-2 focus:ring-accent focus:outline-none"
+                      min={0}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -471,5 +511,75 @@ export default function GamesPage() {
         </div>
       )}
     </>
+  );
+}
+
+// ── PlayerCombobox ────────────────────────────────────────────────────────────
+
+function PlayerCombobox({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const [inputText, setInputText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(inputText), 300);
+    return () => clearTimeout(t);
+  }, [inputText]);
+
+  const { data } = usePaginatedData<PlayerDetail>("players/", 1, debouncedSearch);
+  const options = data?.results ?? [];
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <input
+        type="text"
+        value={inputText}
+        onChange={(e) => {
+          setInputText(e.target.value);
+          onChange("");
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder="Search by name…"
+        className="w-full px-3 py-2 bg-background border border-card-border rounded text-sm text-foreground focus:ring-2 focus:ring-accent focus:outline-none"
+      />
+      {open && options.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-card-bg border border-card-border rounded shadow-lg max-h-48 overflow-y-auto">
+          {options.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => {
+                onChange(String(p.id));
+                setInputText(p.full_name);
+                setOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent/10 ${
+                String(p.id) === value ? "text-accent font-medium bg-accent/5" : "text-foreground"
+              }`}
+            >
+              {p.full_name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

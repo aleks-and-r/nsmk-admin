@@ -6,6 +6,7 @@ import {
   getLeagueResults,
   getLeagueSchedule,
   getLeagueStandings,
+  getLeagueTeamStats,
 } from '@/services/leagues.service';
 
 export const useLeagues = () => {
@@ -52,5 +53,14 @@ export const useLeagueStandings = (id: string) => {
     queryKey: ['leagues', id, 'standings'],
     queryFn: () => getLeagueStandings(id),
     enabled: !!id,
+  });
+};
+
+export const useLeagueTeamStats = (leagueId: string) => {
+  return useQuery({
+    queryKey: ['leagues', leagueId, 'team-stats'],
+    queryFn: () => getLeagueTeamStats(leagueId),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!leagueId,
   });
 };
