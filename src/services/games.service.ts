@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios';
+import { importFile } from '@/lib/importFile';
 import type { PaginatedResponse } from '@/types/api';
 
 export type GameStatus =
@@ -158,3 +159,5 @@ export const deletePlayerGameStat = async (id: number): Promise<void> => {
 export const deleteGame = async (id: string): Promise<void> => {
   await apiClient.delete(`games/${id}/`);
 };
+
+export const importGames = (file: File) => importFile('games/import/', file);

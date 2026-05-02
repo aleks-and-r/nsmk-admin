@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios';
+import { importFile } from '@/lib/importFile';
 import type { PaginatedResponse } from '@/types/api';
 
 export interface LeagueTeam {
@@ -114,3 +115,5 @@ export const refreshLeagueSummaries = async (leagueId: string): Promise<RefreshS
   const { data } = await apiClient.post<RefreshSummariesResponse>(`leagues/${leagueId}/refresh-summaries/`);
   return data;
 };
+
+export const importLeagues = (file: File) => importFile('leagues/import/', file);

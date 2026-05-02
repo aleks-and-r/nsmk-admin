@@ -1,6 +1,8 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import DataTable from "@/components/admin/DataTable";
+import { importLeagues } from "@/services/leagues.service";
 
 interface League {
   id: number;
@@ -34,12 +36,20 @@ const leagueColumns = [
 ];
 
 export default function LeaguesPage() {
+  const queryClient = useQueryClient();
+
+  async function handleImport(file: File) {
+    await importLeagues(file);
+    await queryClient.invalidateQueries({ queryKey: ["leagues/"] });
+  }
+
   return (
     <DataTable<League>
       title="Leagues"
       url="leagues/"
       columns={leagueColumns}
       editBasePath="/leagues"
+      onImport={handleImport}
     />
   );
 }

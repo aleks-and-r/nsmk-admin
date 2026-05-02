@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import DataTable from "@/components/admin/DataTable";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import type { GameStatus } from "@/services/games.service";
-import { deleteGame, createPlayerGameStat, deletePlayerGameStat } from "@/services/games.service";
+import { deleteGame, createPlayerGameStat, deletePlayerGameStat, importGames } from "@/services/games.service";
 import { useGameStats } from "@/hooks/queries/useGames";
 import { useTeams } from "@/hooks/queries/useTeams";
 import { usePaginatedData } from "@/hooks/queries/usePaginatedData";
@@ -192,6 +192,11 @@ export default function GamesPage() {
     }
   }
 
+  async function handleImport(file: File) {
+    await importGames(file);
+    await queryClient.invalidateQueries({ queryKey: ["games/"] });
+  }
+
   async function handleDeleteStat(statId: number) {
     setDeletingStatId(statId);
     try {
@@ -211,6 +216,7 @@ export default function GamesPage() {
         columns={gameColumns}
         editBasePath="/games"
         onDelete={(id) => setDeleteTargetId(id)}
+        onImport={handleImport}
         extraActions={(row) => (
           <button
             type="button"

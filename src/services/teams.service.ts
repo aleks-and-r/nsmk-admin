@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios';
+import { importFile } from '@/lib/importFile';
 import type { PaginatedResponse } from '@/types/api';
 
 export interface TeamPlayer {
@@ -49,3 +50,5 @@ export const updateTeam = async (
   const { data } = await apiClient.patch<Team>(`teams/${id}/`, payload);
   return data;
 };
+
+export const importTeams = (file: File) => importFile('teams/import/', file);

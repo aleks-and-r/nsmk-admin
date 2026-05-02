@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios';
+import { importFile } from '@/lib/importFile';
 import type { PaginatedResponse } from '@/types/api';
 
 export interface SeasonLeague {
@@ -46,3 +47,5 @@ export const updateSeason = async (
   const { data } = await apiClient.patch<Season>(`seasons/${id}/`, payload);
   return data;
 };
+
+export const importSeasons = (file: File) => importFile('seasons/import/', file);

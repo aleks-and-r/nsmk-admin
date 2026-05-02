@@ -5,9 +5,9 @@ import { refreshTokenApi } from '@/services/auth.service';
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/',
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // No default Content-Type — Axios sets application/json for objects and
+  // multipart/form-data (with boundary) for FormData automatically.
+  // A hardcoded 'application/json' default would cause 415 on file uploads.
 });
 
 // ── Request: inject access token ───────────────────────────────────────────

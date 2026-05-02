@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axios";
+import { importFile } from "@/lib/importFile";
 
 export interface Player {
   id: string;
@@ -57,3 +58,5 @@ export const getTopScorers = async (leagueId: string): Promise<Player[]> => {
   });
   return data;
 };
+
+export const importPlayers = (file: File) => importFile('players/import/', file);

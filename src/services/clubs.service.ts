@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axios";
+import { importFile } from "@/lib/importFile";
 
 export interface Club {
   id: string;
@@ -49,3 +50,5 @@ export const updateClub = async (
   const { data } = await apiClient.patch<ClubDetail>(`clubs/${id}/`, payload);
   return data;
 };
+
+export const importClubs = (file: File) => importFile('clubs/import/', file);

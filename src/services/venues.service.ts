@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios';
+import { importFile } from '@/lib/importFile';
 import type { PaginatedResponse } from '@/types/api';
 
 export interface Venue {
@@ -45,9 +46,4 @@ export const deleteVenue = async (id: string): Promise<void> => {
   await apiClient.delete(`venues/${id}/`);
 };
 
-export const importVenues = async (file: File): Promise<unknown> => {
-  const fd = new FormData();
-  fd.append('file', file);
-  const { data } = await apiClient.post('venues/import/', fd);
-  return data;
-};
+export const importVenues = (file: File) => importFile('venues/import/', file);
