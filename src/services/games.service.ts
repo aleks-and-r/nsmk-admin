@@ -161,3 +161,6 @@ export const deleteGame = async (id: string): Promise<void> => {
 };
 
 export const importGames = (file: File) => importFile('games/import/', file);
+
+export const importGameStats = (gameId: string, file: File) =>
+  importFile(`games/${gameId}/import-stats/`, file);

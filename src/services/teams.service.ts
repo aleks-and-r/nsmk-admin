@@ -22,8 +22,6 @@ export interface Team {
 
 export interface TeamPayload {
   club: number;
-  age_group_label?: string;
-  season: number;
   name: string;
   is_active: boolean;
 }

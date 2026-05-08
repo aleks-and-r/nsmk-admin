@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState, use, useRef } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTeam } from "@/hooks/queries/useTeams";
-import { useSeasons } from "@/hooks/queries/useSeasons";
+import { useClubs } from "@/hooks/queries/useClubs";
 import {
   createTeam,
   updateTeam,
@@ -18,15 +18,13 @@ import Button from "@/components/admin/Button";
 
 interface FormState {
   name: string;
-  age_group_label: string;
-  season: string;
+  club: string;
   is_active: boolean;
 }
 
 const EMPTY: FormState = {
   name: "",
-  age_group_label: "",
-  season: "",
+  club: "",
   is_active: true,
 };
 
@@ -45,13 +43,7 @@ export default function TeamPage({
   const queryClient = useQueryClient();
 
   const { data: team, isLoading, isError } = useTeam(isNew ? "" : id);
-  const { data: seasonsData } = useSeasons();
-
-  const seasonOptions =
-    seasonsData?.results.map((s) => ({
-      value: String(s.id),
-      label: s.name,
-    })) ?? [];
+  const { data: clubsData } = useClubs();
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -64,8 +56,7 @@ export default function TeamPage({
     if (team) {
       setForm({
         name: team.name ?? "",
-        age_group_label: team.age_group_label ?? "",
-        season: String(team.season ?? ""),
+        club: String(team.club ?? ""),
         is_active: team.is_active ?? true,
       });
     }
@@ -81,7 +72,7 @@ export default function TeamPage({
   function validate(): FormErrors {
     const e: FormErrors = {};
     if (!form.name.trim()) e.name = "Name is required.";
-    if (!form.season) e.season = "Season is required.";
+    if (!form.club) e.club = "Club is required.";
     return e;
   }
 
@@ -96,10 +87,8 @@ export default function TeamPage({
     setSaveStatus("idle");
     try {
       const payload: TeamPayload = {
-        club: team?.club ?? 0,
+        club: Number(form.club),
         name: form.name,
-        age_group_label: form.age_group_label,
-        season: Number(form.season),
         is_active: form.is_active,
       };
 
@@ -163,23 +152,19 @@ export default function TeamPage({
           />
         </Field>
 
-        <Field label="Age Group Label">
-          <input
-            type="text"
-            value={form.age_group_label}
-            onChange={(e) => handleChange("age_group_label", e.target.value)}
-            className={inputCls()}
-          />
-        </Field>
-
-        <Field label="Season" required error={errors.season}>
-          <SearchableSelect
-            options={seasonOptions}
-            value={form.season}
-            onChange={(v) => handleChange("season", v)}
-            placeholder="Select season…"
-            hasError={!!errors.season}
-          />
+        <Field label="Club" required error={errors.club}>
+          <select
+            value={form.club}
+            onChange={(e) => handleChange("club", e.target.value)}
+            className={inputCls(!!errors.club)}
+          >
+            <option value="">Select club…</option>
+            {clubsData?.results.map((c) => (
+              <option key={c.id} value={String(c.id)}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </Field>
 
         <Field label="Active">
@@ -304,109 +289,6 @@ function Field({
       </label>
       {children}
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-    </div>
-  );
-}
-
-// ── SearchableSelect ──────────────────────────────────────────────────────────
-
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
-function SearchableSelect({
-  options,
-  value,
-  onChange,
-  placeholder = "Select…",
-  hasError = false,
-}: {
-  options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  hasError?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const selected = options.find((o) => o.value === value);
-  const filtered = options.filter((o) =>
-    o.label.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  useEffect(() => {
-    function handleOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-        setSearch("");
-      }
-    }
-    if (open) document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, [open]);
-
-  const borderCls = hasError
-    ? "border-red-500 focus:ring-red-500"
-    : "border-card-border focus:ring-accent";
-
-  return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className={`w-full px-3 py-2 bg-background border rounded text-sm text-left flex items-center justify-between cursor-pointer focus:outline-none focus:ring-2 ${borderCls}`}
-      >
-        <span className={selected ? "text-foreground" : "text-foreground/40"}>
-          {selected ? selected.label : placeholder}
-        </span>
-        <svg
-          className={`w-4 h-4 text-foreground/40 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {open && (
-        <div className="absolute z-50 w-full mt-1 bg-card-bg border border-card-border rounded shadow-lg flex flex-col max-h-60">
-          <div className="p-2 border-b border-card-border shrink-0">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search…"
-              className="w-full px-2 py-1.5 bg-background border border-card-border rounded text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-              autoFocus
-            />
-          </div>
-          <div className="overflow-y-auto">
-            {filtered.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-foreground/50">No results.</p>
-            ) : (
-              filtered.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => { onChange(opt.value); setOpen(false); setSearch(""); }}
-                  className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent/10 ${
-                    opt.value === value ? "text-accent font-medium bg-accent/5" : "text-foreground"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import DataTable from "@/components/admin/DataTable";
 import Button from "@/components/admin/Button";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import type { GameStatus } from "@/services/games.service";
-import { deleteGame, createPlayerGameStat, deletePlayerGameStat, importGames } from "@/services/games.service";
+import { deleteGame, createPlayerGameStat, deletePlayerGameStat, importGames, importGameStats } from "@/services/games.service";
 import { useGameStats } from "@/hooks/queries/useGames";
 import { useTeams } from "@/hooks/queries/useTeams";
 import { usePaginatedData } from "@/hooks/queries/usePaginatedData";
@@ -122,6 +122,8 @@ export default function GamesPage() {
   const [statError, setStatError] = useState("");
   const [statSuccess, setStatSuccess] = useState(false);
   const [deletingStatId, setDeletingStatId] = useState<number | null>(null);
+  const [importingStats, setImportingStats] = useState(false);
+  const statsImportRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
   const { data: statsData, refetch: refetchStats, isLoading: statsLoading } =
@@ -208,6 +210,19 @@ export default function GamesPage() {
     }
   }
 
+  async function handleImportStats(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !statsGameId) return;
+    setImportingStats(true);
+    try {
+      await importGameStats(statsGameId, file);
+      await refetchStats();
+    } finally {
+      setImportingStats(false);
+      e.target.value = "";
+    }
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
@@ -273,12 +288,33 @@ export default function GamesPage() {
                   {statsGameLabel}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={closeStats}
-                className="p-1.5 rounded hover:bg-foreground/10 text-foreground/50 transition-colors"
-                aria-label="Close"
-              >
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="raw"
+                  size="icon"
+                  onClick={() => statsImportRef.current?.click()}
+                  disabled={importingStats}
+                  className="bg-btn-download hover:bg-btn-download/90 text-white"
+                  aria-label="Import stats"
+                  title="Import stats (CSV / XLSX)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                </Button>
+                <input
+                  ref={statsImportRef}
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  className="hidden"
+                  onChange={handleImportStats}
+                />
+                <button
+                  type="button"
+                  onClick={closeStats}
+                  className="p-1.5 rounded hover:bg-foreground/10 text-foreground/50 transition-colors"
+                  aria-label="Close"
+                >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-4 h-4"
@@ -293,7 +329,8 @@ export default function GamesPage() {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-              </button>
+                </button>
+              </div>
             </div>
 
             {/* Scrollable body */}

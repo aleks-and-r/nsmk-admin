@@ -30,10 +30,6 @@ const NAV_ITEMS: NavItem[] = [
     label: "Seasons",
   },
   {
-    href: "/matches",
-    label: "Matches",
-  },
-  {
     href: "/games",
     label: "Games",
   },

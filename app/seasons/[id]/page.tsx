@@ -11,7 +11,6 @@ import EditPageHeader from "@/components/admin/EditPageHeader";
 import Button from "@/components/admin/Button";
 
 interface FormState {
-  code: string;
   name: string;
   start_date: string;
   end_date: string;
@@ -19,7 +18,6 @@ interface FormState {
 }
 
 const EMPTY: FormState = {
-  code: "",
   name: "",
   start_date: "",
   end_date: "",
@@ -43,13 +41,14 @@ export default function SeasonPage({
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
   const [serverError, setServerError] = useState("");
 
   useEffect(() => {
     if (season) {
       setForm({
-        code: season.code ?? "",
         name: season.name ?? "",
         start_date: season.start_date ?? "",
         end_date: season.end_date ?? "",
@@ -67,7 +66,6 @@ export default function SeasonPage({
 
   function validate(): FormErrors {
     const e: FormErrors = {};
-    if (!form.code.trim()) e.code = "Code is required.";
     if (!form.name.trim()) e.name = "Name is required.";
     return e;
   }
@@ -84,10 +82,9 @@ export default function SeasonPage({
     setServerError("");
     try {
       const payload = {
-        code: form.code,
         name: form.name,
-        start_date: form.start_date,
-        end_date: form.end_date,
+        start_date: form.start_date || null,
+        end_date: form.end_date || null,
         is_active: form.is_active,
       };
 
@@ -98,7 +95,7 @@ export default function SeasonPage({
       }
 
       setSaveStatus("success");
-      await queryClient.invalidateQueries({ queryKey: ["seasons"] });
+      await queryClient.invalidateQueries({ queryKey: ["seasons/"] });
       if (isNew) {
         setTimeout(() => router.push("/seasons"), 1000);
       }
@@ -137,7 +134,7 @@ export default function SeasonPage({
       />
 
       <div className="bg-card-bg border border-card-border rounded-lg p-6 space-y-5">
-        <Field label="Code" required error={errors.code}>
+        {/* <Field label="Code" required error={errors.code}>
           <input
             type="text"
             value={form.code}
@@ -145,7 +142,7 @@ export default function SeasonPage({
             className={inputCls(!!errors.code)}
             placeholder="e.g. Seed 2024-25"
           />
-        </Field>
+        </Field> */}
 
         <Field label="Name" required error={errors.name}>
           <input
@@ -198,7 +195,9 @@ export default function SeasonPage({
           )}
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
-              {isNew ? "Created successfully. Redirecting…" : "Saved successfully."}
+              {isNew
+                ? "Created successfully. Redirecting…"
+                : "Saved successfully."}
             </span>
           )}
         </div>
@@ -231,8 +230,12 @@ export default function SeasonPage({
                   key={league.id}
                   className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-foreground/50">{league.id}</td>
-                  <td className="px-4 py-3 text-sm text-foreground font-medium">{league.name}</td>
+                  <td className="px-4 py-3 text-sm text-foreground/50">
+                    {league.id}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground font-medium">
+                    {league.name}
+                  </td>
                 </tr>
               ))}
             </tbody>

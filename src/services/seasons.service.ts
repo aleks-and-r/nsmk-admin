@@ -9,19 +9,17 @@ export interface SeasonLeague {
 
 export interface Season {
   id: number;
-  code: string;
   name: string;
-  start_date: string;
-  end_date: string;
+  start_date: string | null;
+  end_date: string | null;
   is_active: boolean;
   leagues: SeasonLeague[];
 }
 
 export interface SeasonPayload {
-  code: string;
   name: string;
-  start_date: string;
-  end_date: string;
+  start_date?: string | null;
+  end_date?: string | null;
   is_active: boolean;
 }
 

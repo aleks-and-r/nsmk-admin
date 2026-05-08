@@ -5,6 +5,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLeague, useLeagueTeamStats } from "@/hooks/queries/useLeagues";
+import { useSeasons } from "@/hooks/queries/useSeasons";
 import {
   createLeague,
   updateLeague,
@@ -14,7 +15,19 @@ import {
 import EditPageHeader from "@/components/admin/EditPageHeader";
 import Button from "@/components/admin/Button";
 
-const AGE_GROUP_OPTIONS = ["U8", "U10", "U12", "U14", "U16", "U18", "Senior"];
+const AGE_GROUP_OPTIONS = [
+  "U10",
+  "U11",
+  "U12",
+  "U13",
+  "U14",
+  "U15",
+  "U16",
+  "U17",
+  "U18",
+  "VETERAN",
+  "SENIOR",
+];
 
 interface FormState {
   name: string;
@@ -51,14 +64,21 @@ export default function LeaguePage({
 
   const queryClient = useQueryClient();
   const { data: league, isLoading, isError } = useLeague(isNew ? "" : id);
-  const { data: teamStats, isLoading: statsLoading } = useLeagueTeamStats(isNew ? "" : id);
+  const { data: teamStats, isLoading: statsLoading } = useLeagueTeamStats(
+    isNew ? "" : id,
+  );
+  const { data: seasonsData } = useSeasons();
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
   const [refreshing, setRefreshing] = useState(false);
-  const [refreshStatus, setRefreshStatus] = useState<"idle" | "success" | "skipped" | "error">("idle");
+  const [refreshStatus, setRefreshStatus] = useState<
+    "idle" | "success" | "skipped" | "error"
+  >("idle");
 
   useEffect(() => {
     if (league) {
@@ -119,7 +139,7 @@ export default function LeaguePage({
       }
 
       setSaveStatus("success");
-      await queryClient.invalidateQueries({ queryKey: ["leagues"] });
+      await queryClient.invalidateQueries({ queryKey: ["leagues/"] });
       if (isNew) {
         setTimeout(() => router.push("/leagues"), 1000);
       }
@@ -136,7 +156,9 @@ export default function LeaguePage({
     try {
       const result = await refreshLeagueSummaries(id);
       setRefreshStatus(result.skipped ? "skipped" : "success");
-      await queryClient.invalidateQueries({ queryKey: ["leagues", id, "team-stats"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["leagues", id, "team-stats"],
+      });
     } catch {
       setRefreshStatus("error");
     } finally {
@@ -183,13 +205,19 @@ export default function LeaguePage({
           />
         </Field>
 
-        <Field label="Season ID" required error={errors.season}>
-          <input
-            type="number"
+        <Field label="Season" required error={errors.season}>
+          <select
             value={form.season}
             onChange={(e) => handleChange("season", e.target.value)}
             className={inputCls(!!errors.season)}
-          />
+          >
+            <option value="">Select season…</option>
+            {seasonsData?.results.map((s) => (
+              <option key={s.id} value={String(s.id)}>
+                {s.name}
+              </option>
+            ))}
+          </select>
         </Field>
 
         <Field label="Age Group">
@@ -346,13 +374,19 @@ export default function LeaguePage({
       {!isNew && (
         <div className="mt-6 bg-card-bg border border-card-border rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-card-border flex items-center justify-between gap-4">
-            <h2 className="text-sm font-semibold text-foreground">Team Stats</h2>
+            <h2 className="text-sm font-semibold text-foreground">
+              Team Stats
+            </h2>
             <div className="flex items-center gap-3">
               {refreshStatus === "success" && (
-                <span className="text-xs text-green-600">Summaries refreshed.</span>
+                <span className="text-xs text-green-600">
+                  Summaries refreshed.
+                </span>
               )}
               {refreshStatus === "skipped" && (
-                <span className="text-xs text-amber-500">Skipped — league has no season.</span>
+                <span className="text-xs text-amber-500">
+                  Skipped — league has no season.
+                </span>
               )}
               {refreshStatus === "error" && (
                 <span className="text-xs text-red-500">Refresh failed.</span>
@@ -366,35 +400,66 @@ export default function LeaguePage({
           {statsLoading ? (
             <div className="px-4 py-3 space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-4 rounded bg-card-border animate-pulse" />
+                <div
+                  key={i}
+                  className="h-4 rounded bg-card-border animate-pulse"
+                />
               ))}
             </div>
           ) : !teamStats || teamStats.length === 0 ? (
-            <p className="px-6 py-4 text-sm text-foreground/50">No stats yet.</p>
+            <p className="px-6 py-4 text-sm text-foreground/50">
+              No stats yet.
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-card-border">
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50">Team</th>
-                    {["GP", "PTS", "PPG", "2PM", "3PM", "FTM", "Fouls/G"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-foreground/50">
-                        {h}
-                      </th>
-                    ))}
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50">
+                      Team
+                    </th>
+                    {["GP", "PTS", "PPG", "2PM", "3PM", "FTM", "Fouls/G"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-foreground/50"
+                        >
+                          {h}
+                        </th>
+                      ),
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {teamStats.map((row, i) => (
-                    <tr key={i} className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors">
-                      <td className="px-4 py-3 text-sm text-foreground font-medium">{row.team_name}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.games_played}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.points}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.ppg.toFixed(1)}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.two_pt_made}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.three_pt_made}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.ft_made}</td>
-                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">{row.fouls_pg.toFixed(1)}</td>
+                    <tr
+                      key={i}
+                      className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-sm text-foreground font-medium">
+                        {row.team_name}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.games_played}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.points}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.ppg.toFixed(1)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.two_pt_made}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.three_pt_made}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.ft_made}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground/80 text-right">
+                        {row.fouls_pg.toFixed(1)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
