@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getAuthState } from '@/lib/auth';
-import Sidebar from './Sidebar';
-import TopBar from './TopBar';
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getAuthState } from "@/lib/auth";
+import Sidebar from "./Sidebar";
+import TopBar from "./TopBar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -20,8 +20,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     const auth = getAuthState();
     if (!auth) {
-      router.replace('/login');
+      router.replace("/login");
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAuthorized(true);
     }
     setMounted(true);
@@ -36,9 +37,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <Sidebar collapsed={collapsed} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
   type LeaguePayload,
 } from "@/services/leagues.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
+import Button from "@/components/admin/Button";
 
 const AGE_GROUP_OPTIONS = ["U8", "U10", "U12", "U14", "U16", "U18", "Senior"];
 
@@ -263,14 +264,9 @@ export default function LeaguePage({
         </Field>
 
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-          >
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
-          </button>
+          </Button>
 
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
@@ -361,14 +357,9 @@ export default function LeaguePage({
               {refreshStatus === "error" && (
                 <span className="text-xs text-red-500">Refresh failed.</span>
               )}
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="px-3 py-1.5 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-xs transition-colors"
-              >
+              <Button size="xs" onClick={handleRefresh} disabled={refreshing}>
                 {refreshing ? "Refreshing…" : "Refresh Summaries"}
-              </button>
+              </Button>
             </div>
           </div>
 

@@ -1,10 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { downloadExport } from "@/lib/download";
 import { usePaginatedData } from "@/hooks/queries/usePaginatedData";
+import TableToolbar from "./TableToolbar";
+import TablePagination from "./TablePagination";
+import EditIcon from "@/components/icons/EditIcon";
+import DeleteIcon from "@/components/icons/DeleteIcon";
 
 export interface TableColumn<T> {
   key: string;
@@ -47,30 +51,7 @@ export default function DataTable<T extends { id: number | string }>({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !onImport) return;
-    setImporting(true);
-    try {
-      await onImport(file);
-    } finally {
-      setImporting(false);
-      e.target.value = "";
-    }
-  }
-
-  async function handleExport() {
-    setExporting(true);
-    try {
-      await downloadExport(`${url}export/`);
-    } finally {
-      setExporting(false);
-    }
-  }
-
-  // Debounce search
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(search);
@@ -85,147 +66,45 @@ export default function DataTable<T extends { id: number | string }>({
     debouncedSearch,
   );
 
-  // Page size is determined by the API; infer from a full page (next != null),
-  // otherwise fall back to total count or default 15.
+  // Page size inferred from a full page (next != null), else fall back to count or 15.
   const pageSize = data?.next ? data.results.length : (data?.count ?? 15);
-
   const totalPages = data ? Math.ceil(data.count / pageSize) : 1;
   const from = data ? (page - 1) * pageSize + 1 : 0;
   const to = data ? Math.min(page * pageSize, data.count) : 0;
 
-  function getPageNumbers(): (number | "...")[] {
-    if (totalPages <= 7)
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    const pages: (number | "...")[] = [1];
-    if (page > 3) pages.push("...");
-    for (
-      let i = Math.max(2, page - 1);
-      i <= Math.min(totalPages - 1, page + 1);
-      i++
-    ) {
-      pages.push(i);
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await downloadExport(`${url}export/`);
+    } finally {
+      setExporting(false);
     }
-    if (page < totalPages - 2) pages.push("...");
-    pages.push(totalPages);
-    return pages;
+  }
+
+  async function handleImport(file: File) {
+    setImporting(true);
+    try {
+      await onImport?.(file);
+    } finally {
+      setImporting(false);
+    }
   }
 
   return (
     <div>
-      {/* Page title */}
       <h1 className="text-2xl font-bold text-foreground mb-6">{title}</h1>
 
-      {/* Card */}
       <div className="bg-card-bg border border-card-border rounded-lg overflow-hidden">
-        {/* Toolbar */}
-        <div className="flex items-center justify-end gap-2 px-4 py-3 border-b border-card-border flex-wrap">
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-1.5 text-sm rounded border border-card-border bg-background text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent w-48"
-          />
+        <TableToolbar
+          search={search}
+          onSearchChange={setSearch}
+          editBasePath={editBasePath}
+          exporting={exporting}
+          onExport={handleExport}
+          importing={importing}
+          onImport={onImport ? handleImport : undefined}
+        />
 
-          {/* Add new */}
-          <Link
-            href={`${editBasePath}/new`}
-            className="px-4 py-1.5 text-sm font-semibold rounded bg-accent hover:bg-accent/90 text-white transition-colors"
-          >
-            Add new
-          </Link>
-
-          {/* Export icon (amber) */}
-          <button
-            onClick={handleExport}
-            disabled={exporting}
-            className="p-1.5 rounded bg-btn-export hover:bg-btn-export/90 disabled:opacity-60 text-white transition-colors"
-            aria-label="Export"
-            title="Export to CSV"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-          </button>
-
-          {/* Import icon (teal) */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={importing || !onImport}
-            className="p-1.5 rounded bg-btn-download hover:bg-btn-download/90 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
-            aria-label="Import CSV"
-            title={onImport ? "Import CSV" : "Import not available"}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 12l-4-4-4 4"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 20V8"
-              />
-            </svg>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,.xlsx,.xls"
-            className="hidden"
-            onChange={handleImportFile}
-          />
-
-          {/* Dropdown chevron */}
-          <button
-            className="p-1.5 rounded border border-card-border hover:bg-black/5 text-foreground/50 transition-colors"
-            aria-label="More options"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -286,7 +165,7 @@ export default function DataTable<T extends { id: number | string }>({
               {!isLoading &&
                 !isError &&
                 data?.results.map((row) => {
-                  const rowIdValue = String(
+                  const rowId = String(
                     (row as Record<string, unknown>)[idKey] ?? row.id,
                   );
                   return (
@@ -309,48 +188,22 @@ export default function DataTable<T extends { id: number | string }>({
                       })}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
-                          {extraActions && extraActions(row)}
+                          {extraActions?.(row)}
                           <Link
-                            href={`${editBasePath}/${rowIdValue}`}
+                            href={`${editBasePath}/${rowId}`}
                             className="inline-flex items-center justify-center w-7 h-7 rounded bg-btn-edit hover:bg-btn-edit/90 text-white transition-colors"
                             aria-label="Edit"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="w-3.5 h-3.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                              />
-                            </svg>
+                            <EditIcon className="w-3.5 h-3.5" />
                           </Link>
                           {onDelete && (
                             <button
                               type="button"
-                              onClick={() => onDelete(rowIdValue)}
+                              onClick={() => onDelete(rowId)}
                               className="inline-flex items-center justify-center w-7 h-7 rounded bg-red-500/80 hover:bg-red-500 text-white transition-colors"
                               aria-label="Delete"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="w-3.5 h-3.5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
+                              <DeleteIcon className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
@@ -362,55 +215,14 @@ export default function DataTable<T extends { id: number | string }>({
           </table>
         </div>
 
-        {/* Pagination */}
-        {data && data.count > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-card-border flex-wrap gap-2">
-            <p className="text-sm text-foreground/50">
-              Showing {from}–{to} of {data.count}
-            </p>
-
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPage((p) => p - 1)}
-                disabled={page === 1}
-                className="px-2.5 py-1 text-sm rounded border border-card-border hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-foreground"
-              >
-                ‹ Prev
-              </button>
-
-              {getPageNumbers().map((p, i) =>
-                p === "..." ? (
-                  <span
-                    key={`ellipsis-${i}`}
-                    className="px-2 py-1 text-sm text-foreground/40"
-                  >
-                    …
-                  </span>
-                ) : (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`w-8 h-8 text-sm rounded border transition-colors ${
-                      p === page
-                        ? "bg-accent text-white border-accent"
-                        : "border-card-border hover:bg-black/5 text-foreground"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ),
-              )}
-
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page === totalPages}
-                className="px-2.5 py-1 text-sm rounded border border-card-border hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-foreground"
-              >
-                Next ›
-              </button>
-            </div>
-          </div>
-        )}
+        <TablePagination
+          page={page}
+          totalPages={totalPages}
+          count={data?.count ?? 0}
+          from={from}
+          to={to}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );

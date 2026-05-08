@@ -8,6 +8,7 @@ import { useSeason } from "@/hooks/queries/useSeasons";
 import { createSeason, updateSeason } from "@/services/seasons.service";
 import { applyServerErrors } from "@/lib/formErrors";
 import EditPageHeader from "@/components/admin/EditPageHeader";
+import Button from "@/components/admin/Button";
 
 interface FormState {
   code: string;
@@ -188,14 +189,9 @@ export default function SeasonPage({
         </Field>
 
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-          >
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
-          </button>
+          </Button>
 
           {serverError && (
             <span className="text-sm text-red-500">{serverError}</span>

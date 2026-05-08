@@ -12,6 +12,7 @@ import { createClub, updateClub } from "@/services/clubs.service";
 import { createTeam, type TeamPayload } from "@/services/teams.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
 import ImageUpload from "@/components/admin/ImageUpload";
+import Button from "@/components/admin/Button";
 
 // ── Club form ─────────────────────────────────────────────────────────────────
 
@@ -375,14 +376,9 @@ export default function ClubPage({
             </Field>
 
             <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-              >
+              <Button onClick={handleSave} disabled={saving}>
                 {saving ? "Saving…" : "Save"}
-              </button>
+              </Button>
 
               {saveStatus === "success" && (
                 <span className="text-sm text-green-600">
@@ -536,14 +532,9 @@ export default function ClubPage({
             </Field>
 
             <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleTeamSave}
-                disabled={teamSaving}
-                className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-              >
+              <Button onClick={handleTeamSave} disabled={teamSaving}>
                 {teamSaving ? "Creating…" : "Add Team"}
-              </button>
+              </Button>
 
               {teamStatus === "success" && (
                 <span className="text-sm text-green-600">

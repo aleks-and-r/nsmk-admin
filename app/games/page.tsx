@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import DataTable from "@/components/admin/DataTable";
+import Button from "@/components/admin/Button";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import type { GameStatus } from "@/services/games.service";
 import { deleteGame, createPlayerGameStat, deletePlayerGameStat, importGames } from "@/services/games.service";
@@ -493,14 +494,9 @@ export default function GamesPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleAddStat}
-                    disabled={statSaving}
-                    className="px-5 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-                  >
+                  <Button onClick={handleAddStat} disabled={statSaving}>
                     {statSaving ? "Saving…" : "Add Stats"}
-                  </button>
+                  </Button>
 
                   {statSuccess && (
                     <span className="text-sm text-green-600">

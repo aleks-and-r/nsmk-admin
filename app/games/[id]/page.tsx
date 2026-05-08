@@ -15,6 +15,7 @@ import {
   type GameStatus,
 } from "@/services/games.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
+import Button from "@/components/admin/Button";
 
 const STATUS_OPTIONS: { value: GameStatus; label: string }[] = [
   { value: "scheduled", label: "Scheduled" },
@@ -414,14 +415,9 @@ export default function GamePage({
         </Field>
 
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-          >
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
-          </button>
+          </Button>
 
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
@@ -519,14 +515,9 @@ export default function GamePage({
           </div>
 
           <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleScoreSave}
-              disabled={scoreSaving}
-              className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-            >
+            <Button onClick={handleScoreSave} disabled={scoreSaving}>
               {scoreSaving ? "Updating…" : "Update Score"}
-            </button>
+            </Button>
 
             {scoreStatus === "success" && (
               <span className="text-sm text-green-600">Score updated.</span>

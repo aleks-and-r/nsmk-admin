@@ -1,5 +1,7 @@
 "use client";
 
+import Button from "./Button";
+
 export interface ConfirmDialogProps {
   open: boolean;
   title?: string;
@@ -43,26 +45,17 @@ export default function ConfirmDialog({
         <p className="text-sm text-foreground/70 mb-6">{message}</p>
 
         <div className="flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            className="px-4 py-2 text-sm rounded border border-card-border hover:bg-black/5 disabled:opacity-50 text-foreground transition-colors"
-          >
+          <Button variant="ghost" size="sm" onClick={onCancel} disabled={loading}>
             {cancelLabel}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant={danger ? "danger" : "primary"}
+            size="sm"
             onClick={onConfirm}
             disabled={loading}
-            className={`px-4 py-2 text-sm font-semibold rounded disabled:opacity-50 text-white transition-colors ${
-              danger
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-accent hover:bg-accent/90"
-            }`}
           >
             {loading ? "Please wait…" : confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

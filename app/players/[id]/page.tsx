@@ -13,6 +13,7 @@ import {
 } from "@/services/team-memberships.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
 import ImageUpload from "@/components/admin/ImageUpload";
+import Button from "@/components/admin/Button";
 
 const POSITION_OPTIONS = ["", "PG", "SG", "SF", "PF", "C"];
 const VISIBILITY_OPTIONS = ["Default", "Visible", "Hidden"];
@@ -343,14 +344,9 @@ export default function PlayerPage({
         </Field>
 
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-          >
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
-          </button>
+          </Button>
 
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
@@ -506,14 +502,9 @@ export default function PlayerPage({
           </div>
 
           <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleMembershipSave}
-              disabled={membershipSaving}
-              className="px-6 py-2 bg-accent hover:bg-accent/90 disabled:opacity-60 text-white font-semibold rounded text-sm transition-colors"
-            >
+            <Button onClick={handleMembershipSave} disabled={membershipSaving}>
               {membershipSaving ? "Assigning…" : "Assign to Team"}
-            </button>
+            </Button>
 
             {membershipStatus === "success" && (
               <span className="text-sm text-green-600">
