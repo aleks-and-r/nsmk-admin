@@ -202,8 +202,6 @@ export default function ClubPage({
       const payload: TeamPayload = {
         club: Number(id),
         name: teamForm.name,
-        age_group_label: teamForm.age_group_label,
-        season: Number(teamForm.season),
         is_active: teamForm.is_active,
       };
       await createTeam(payload);
@@ -332,7 +330,9 @@ export default function ClubPage({
                 <input
                   type="tel"
                   value={form.contact_phone ?? ""}
-                  onChange={(e) => handleChange("contact_phone", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("contact_phone", e.target.value)
+                  }
                   placeholder="Enter a phone number"
                   className={`${inputCls()} rounded-l-none`}
                 />

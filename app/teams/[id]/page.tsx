@@ -4,15 +4,29 @@ import type { ReactNode } from "react";
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { useTeam } from "@/hooks/queries/useTeams";
+import { useTeam, useTeamMemberships } from "@/hooks/queries/useTeams";
+import { useLeagueMembershipsByTeam } from "@/hooks/queries/useLeagueMemberships";
 import { useClubs } from "@/hooks/queries/useClubs";
 import {
   createTeam,
   updateTeam,
   type TeamPayload,
 } from "@/services/teams.service";
+import {
+  deleteTeamMembership,
+  bulkUpdateTeamMemberships,
+  type TeamMembership,
+} from "@/services/team-memberships.service";
+import {
+  deleteLeagueMembership,
+  type LeagueMembership,
+} from "@/services/league-memberships.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
 import Button from "@/components/admin/Button";
+import MembershipModal from "@/components/admin/MembershipModal";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import EditIcon from "@/components/icons/EditIcon";
+import DeleteIcon from "@/components/icons/DeleteIcon";
 
 // ── Form state ────────────────────────────────────────────────────────────────
 
@@ -44,6 +58,10 @@ export default function TeamPage({
 
   const { data: team, isLoading, isError } = useTeam(isNew ? "" : id);
   const { data: clubsData } = useClubs();
+  const { data: playerMemberships } = useTeamMemberships(isNew ? "" : id);
+  const { data: leagueMemberships } = useLeagueMembershipsByTeam(
+    isNew ? "" : id,
+  );
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -51,6 +69,30 @@ export default function TeamPage({
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
     "idle",
   );
+
+  // Player membership modal state
+  const [playerModalOpen, setPlayerModalOpen] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<TeamMembership | null>(
+    null,
+  );
+  const [removingPlayer, setRemovingPlayer] = useState<TeamMembership | null>(
+    null,
+  );
+  const [removingPlayerLoading, setRemovingPlayerLoading] = useState(false);
+
+  // Bulk deactivate state
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkDeactivating, setBulkDeactivating] = useState(false);
+
+  // League membership modal state
+  const [leagueModalOpen, setLeagueModalOpen] = useState(false);
+  const [editingLeague, setEditingLeague] = useState<LeagueMembership | null>(
+    null,
+  );
+  const [removingLeague, setRemovingLeague] = useState<LeagueMembership | null>(
+    null,
+  );
+  const [removingLeagueLoading, setRemovingLeagueLoading] = useState(false);
 
   useEffect(() => {
     if (team) {
@@ -61,6 +103,11 @@ export default function TeamPage({
       });
     }
   }, [team]);
+
+  // Clear selection when player memberships change
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [playerMemberships]);
 
   function handleChange(key: keyof FormState, value: string | boolean) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -110,6 +157,66 @@ export default function TeamPage({
     }
   }
 
+  async function handleRemovePlayer() {
+    if (!removingPlayer) return;
+    setRemovingPlayerLoading(true);
+    try {
+      await deleteTeamMembership(removingPlayer.id);
+      setRemovingPlayer(null);
+      await queryClient.invalidateQueries({ queryKey: ["team-memberships/"] });
+    } catch {
+      // ignore
+    } finally {
+      setRemovingPlayerLoading(false);
+    }
+  }
+
+  async function handleBulkDeactivate() {
+    if (selectedIds.size === 0) return;
+    setBulkDeactivating(true);
+    try {
+      await bulkUpdateTeamMemberships([...selectedIds], { is_active: false });
+      setSelectedIds(new Set());
+      await queryClient.invalidateQueries({ queryKey: ["team-memberships/"] });
+    } catch {
+      // ignore
+    } finally {
+      setBulkDeactivating(false);
+    }
+  }
+
+  async function handleRemoveLeague() {
+    if (!removingLeague) return;
+    setRemovingLeagueLoading(true);
+    try {
+      await deleteLeagueMembership(removingLeague.id);
+      setRemovingLeague(null);
+      await queryClient.invalidateQueries({ queryKey: ["league-memberships/"] });
+    } catch {
+      // ignore
+    } finally {
+      setRemovingLeagueLoading(false);
+    }
+  }
+
+  function toggleSelect(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    const all = playerMemberships?.results ?? [];
+    if (selectedIds.size === all.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(all.map((m) => m.id)));
+    }
+  }
+
   // ── Loading / error ───────────────────────────────────────────────────────
 
   if (!isNew && isLoading) {
@@ -127,6 +234,9 @@ export default function TeamPage({
 
   const title = isNew ? "Create team" : "Edit team";
   const subtitle = isNew ? "" : (team?.name ?? "");
+  const players = playerMemberships?.results ?? [];
+  const leagues = leagueMemberships?.results ?? [];
+  const allSelected = players.length > 0 && selectedIds.size === players.length;
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -159,7 +269,7 @@ export default function TeamPage({
             className={inputCls(!!errors.club)}
           >
             <option value="">Select club…</option>
-            {clubsData?.results.map((c) => (
+            {clubsData?.map((c) => (
               <option key={c.id} value={String(c.id)}>
                 {c.name}
               </option>
@@ -197,43 +307,222 @@ export default function TeamPage({
         </div>
       </div>
 
-      {/* ── Players (read-only) ───────────────────────────────────────────── */}
-      {!isNew && team && team.players.length > 0 && (
+      {/* ── Players ───────────────────────────────────────────────────────── */}
+      {!isNew && (
         <div className="bg-card-bg border border-card-border rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-card-border">
+          <div className="px-6 py-4 border-b border-card-border flex items-center justify-between gap-3">
             <h2 className="text-sm font-semibold text-foreground">
-              Players ({team.players.length})
+              Players ({players.length})
             </h2>
-          </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-card-border">
-                {["#", "Name"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {team.players.map((p, i) => (
-                <tr
-                  key={p.id}
-                  className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
+            <div className="flex items-center gap-2">
+              {selectedIds.size > 0 && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={handleBulkDeactivate}
+                  disabled={bulkDeactivating}
                 >
-                  <td className="px-4 py-3 text-sm text-foreground/50 w-12">
-                    {i + 1}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-foreground font-medium">
-                    {p.name}
-                  </td>
+                  {bulkDeactivating
+                    ? "Deactivating…"
+                    : `Deactivate (${selectedIds.size})`}
+                </Button>
+              )}
+              <Button
+                size="xs"
+                onClick={() => {
+                  setEditingPlayer(null);
+                  setPlayerModalOpen(true);
+                }}
+              >
+                + Add Player
+              </Button>
+            </div>
+          </div>
+          {players.length === 0 ? (
+            <p className="px-6 py-4 text-sm text-foreground/50">
+              No players yet.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-card-border bg-background">
+                  <th className="px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 accent-accent"
+                    />
+                  </th>
+                  {["Name", "No.", "Active", "Loan", ""].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {players.map((m) => (
+                  <tr
+                    key={m.id}
+                    className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
+                  >
+                    <td className="px-4 py-3 w-8">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(m.id)}
+                        onChange={() => toggleSelect(m.id)}
+                        className="w-4 h-4 accent-accent"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-foreground font-medium">
+                      {m.player_name}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {m.number ?? "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${
+                          m.is_active
+                            ? "bg-green-500/15 text-green-600"
+                            : "bg-foreground/10 text-foreground/50"
+                        }`}
+                      >
+                        {m.is_active ? "Yes" : "No"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-foreground/60 text-xs">
+                      {m.loan ? "Yes" : "No"}
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          variant="raw"
+                          size="icon"
+                          className="text-foreground/50 hover:text-accent"
+                          onClick={() => {
+                            setEditingPlayer(m);
+                            setPlayerModalOpen(true);
+                          }}
+                        >
+                          <EditIcon className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="raw"
+                          size="icon"
+                          className="text-foreground/50 hover:text-red-500"
+                          onClick={() => setRemovingPlayer(m)}
+                        >
+                          <DeleteIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* ── Leagues ───────────────────────────────────────────────────────── */}
+      {!isNew && (
+        <div className="bg-card-bg border border-card-border rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-card-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground">
+              Leagues ({leagues.length})
+            </h2>
+            <Button
+              size="xs"
+              onClick={() => {
+                setEditingLeague(null);
+                setLeagueModalOpen(true);
+              }}
+            >
+              + Add to League
+            </Button>
+          </div>
+          {leagues.length === 0 ? (
+            <p className="px-6 py-4 text-sm text-foreground/50">
+              Not in any league yet.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-card-border bg-background">
+                  {["League", "In Competition", "Withdrawn", ""].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {leagues.map((m) => (
+                  <tr
+                    key={m.id}
+                    className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
+                  >
+                    <td className="px-4 py-3 text-foreground font-medium">
+                      {m.league}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${
+                          m.in_competition
+                            ? "bg-green-500/15 text-green-600"
+                            : "bg-foreground/10 text-foreground/50"
+                        }`}
+                      >
+                        {m.in_competition ? "Yes" : "No"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${
+                          m.is_withdrawn
+                            ? "bg-red-500/10 text-red-500"
+                            : "bg-foreground/10 text-foreground/50"
+                        }`}
+                      >
+                        {m.is_withdrawn ? "Yes" : "No"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          variant="raw"
+                          size="icon"
+                          className="text-foreground/50 hover:text-accent"
+                          onClick={() => {
+                            setEditingLeague(m);
+                            setLeagueModalOpen(true);
+                          }}
+                        >
+                          <EditIcon className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="raw"
+                          size="icon"
+                          className="text-foreground/50 hover:text-red-500"
+                          onClick={() => setRemovingLeague(m)}
+                        >
+                          <DeleteIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
@@ -247,16 +536,61 @@ export default function TeamPage({
           </div>
           <ul className="divide-y divide-card-border">
             {team.coaches.map((c, i) => (
-              <li
-                key={i}
-                className="px-4 py-3 text-sm text-foreground"
-              >
+              <li key={i} className="px-4 py-3 text-sm text-foreground">
                 {String(c)}
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      <MembershipModal
+        open={playerModalOpen}
+        kind="team-member"
+        fixedTeam={isNew ? undefined : Number(id)}
+        initialValues={editingPlayer ?? undefined}
+        onSaved={() =>
+          queryClient.invalidateQueries({ queryKey: ["team-memberships/"] })
+        }
+        onClose={() => {
+          setPlayerModalOpen(false);
+          setEditingPlayer(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!removingPlayer}
+        title="Remove player from team"
+        message={`Remove ${removingPlayer?.player_name ?? "this player"} from the team? This cannot be undone.`}
+        confirmLabel="Remove"
+        onConfirm={handleRemovePlayer}
+        onCancel={() => setRemovingPlayer(null)}
+        loading={removingPlayerLoading}
+      />
+
+      <MembershipModal
+        open={leagueModalOpen}
+        kind="league-member"
+        fixedTeam={isNew ? undefined : Number(id)}
+        initialValues={editingLeague ?? undefined}
+        onSaved={() =>
+          queryClient.invalidateQueries({ queryKey: ["league-memberships/"] })
+        }
+        onClose={() => {
+          setLeagueModalOpen(false);
+          setEditingLeague(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!removingLeague}
+        title="Remove league membership"
+        message={`Remove this team from league ${removingLeague?.league ?? ""}? This cannot be undone.`}
+        confirmLabel="Remove"
+        onConfirm={handleRemoveLeague}
+        onCancel={() => setRemovingLeague(null)}
+        loading={removingLeagueLoading}
+      />
     </div>
   );
 }

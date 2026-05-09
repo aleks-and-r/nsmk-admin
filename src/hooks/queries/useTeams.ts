@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getTeams, getTeamById } from '@/services/teams.service';
-import { getTeamMembershipsByPlayer } from '@/services/team-memberships.service';
+import { getTeamMembershipsByPlayer, getTeamMembershipsByTeam } from '@/services/team-memberships.service';
 
 export const useTeams = () => {
   return useQuery({
@@ -25,5 +25,14 @@ export const usePlayerTeamMemberships = (playerId: number | undefined) => {
     queryFn: () => getTeamMembershipsByPlayer(playerId!),
     staleTime: 1000 * 60 * 5,
     enabled: !!playerId,
+  });
+};
+
+export const useTeamMemberships = (teamId: string) => {
+  return useQuery({
+    queryKey: ['team-memberships/', { team: teamId }],
+    queryFn: () => getTeamMembershipsByTeam(Number(teamId)),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!teamId,
   });
 };

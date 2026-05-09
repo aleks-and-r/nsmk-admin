@@ -62,7 +62,7 @@ export interface GamePayload {
   home_team: number;
   away_team: number;
   venue?: number | null;
-  scheduled_at: string;
+  scheduled_at?: string | null;
   court_name?: string;
   status: GameStatus;
   notes?: string;

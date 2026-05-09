@@ -6,14 +6,23 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLeague, useLeagueTeamStats } from "@/hooks/queries/useLeagues";
 import { useSeasons } from "@/hooks/queries/useSeasons";
+import { useLeagueMembershipsByLeague } from "@/hooks/queries/useLeagueMemberships";
 import {
   createLeague,
   updateLeague,
   refreshLeagueSummaries,
   type LeaguePayload,
 } from "@/services/leagues.service";
+import {
+  deleteLeagueMembership,
+  type LeagueMembership,
+} from "@/services/league-memberships.service";
 import EditPageHeader from "@/components/admin/EditPageHeader";
 import Button from "@/components/admin/Button";
+import MembershipModal from "@/components/admin/MembershipModal";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import EditIcon from "@/components/icons/EditIcon";
+import DeleteIcon from "@/components/icons/DeleteIcon";
 
 const AGE_GROUP_OPTIONS = [
   "U10",
@@ -68,6 +77,7 @@ export default function LeaguePage({
     isNew ? "" : id,
   );
   const { data: seasonsData } = useSeasons();
+  const { data: memberships } = useLeagueMembershipsByLeague(isNew ? "" : id);
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -79,6 +89,13 @@ export default function LeaguePage({
   const [refreshStatus, setRefreshStatus] = useState<
     "idle" | "success" | "skipped" | "error"
   >("idle");
+
+  const [membershipModalOpen, setMembershipModalOpen] = useState(false);
+  const [editingMembership, setEditingMembership] =
+    useState<LeagueMembership | null>(null);
+  const [removingMembership, setRemovingMembership] =
+    useState<LeagueMembership | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   useEffect(() => {
     if (league) {
@@ -163,6 +180,20 @@ export default function LeaguePage({
       setRefreshStatus("error");
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function handleRemoveMembership() {
+    if (!removingMembership) return;
+    setRemoving(true);
+    try {
+      await deleteLeagueMembership(removingMembership.id);
+      setRemovingMembership(null);
+      await queryClient.invalidateQueries({ queryKey: ["league-memberships/"] });
+    } catch {
+      // ignore
+    } finally {
+      setRemoving(false);
     }
   }
 
@@ -311,62 +342,100 @@ export default function LeaguePage({
         </div>
       </div>
 
-      {/* Teams section (read-only) */}
-      {!isNew && league && league.teams.length > 0 && (
+      {/* Teams section */}
+      {!isNew && (
         <div className="mt-6 bg-card-bg border border-card-border rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-card-border">
+          <div className="px-6 py-4 border-b border-card-border flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
-              Teams ({league.teams.length})
+              Teams ({memberships?.results.length ?? 0})
             </h2>
+            <Button
+              size="xs"
+              onClick={() => {
+                setEditingMembership(null);
+                setMembershipModalOpen(true);
+              }}
+            >
+              + Add Team
+            </Button>
           </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-card-border">
-                {["Name", "In Competition", "Withdrawn"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {league.teams.map((team) => (
-                <tr
-                  key={team.id}
-                  className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
-                >
-                  <td className="px-4 py-3 text-sm text-foreground font-medium">
-                    {team.team_name}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        team.in_competition
-                          ? "bg-green-500/10 text-green-600"
-                          : "bg-foreground/10 text-foreground/50"
-                      }`}
+          {!memberships || memberships.results.length === 0 ? (
+            <p className="px-6 py-4 text-sm text-foreground/50">
+              No teams yet.
+            </p>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-card-border">
+                  {["Name", "In Competition", "Withdrawn", ""].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-foreground/50"
                     >
-                      {team.in_competition ? "Yes" : "No"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        team.is_withdrawn
-                          ? "bg-red-500/10 text-red-500"
-                          : "bg-foreground/10 text-foreground/50"
-                      }`}
-                    >
-                      {team.is_withdrawn ? "Yes" : "No"}
-                    </span>
-                  </td>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {memberships.results.map((m) => (
+                  <tr
+                    key={m.id}
+                    className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
+                  >
+                    <td className="px-4 py-3 text-sm text-foreground font-medium">
+                      {m.team_name}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          m.in_competition
+                            ? "bg-green-500/10 text-green-600"
+                            : "bg-foreground/10 text-foreground/50"
+                        }`}
+                      >
+                        {m.in_competition ? "Yes" : "No"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          m.is_withdrawn
+                            ? "bg-red-500/10 text-red-500"
+                            : "bg-foreground/10 text-foreground/50"
+                        }`}
+                      >
+                        {m.is_withdrawn ? "Yes" : "No"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          variant="raw"
+                          size="icon"
+                          className="text-foreground/50 hover:text-accent"
+                          onClick={() => {
+                            setEditingMembership(m);
+                            setMembershipModalOpen(true);
+                          }}
+                        >
+                          <EditIcon className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="raw"
+                          size="icon"
+                          className="text-foreground/50 hover:text-red-500"
+                          onClick={() => setRemovingMembership(m)}
+                        >
+                          <DeleteIcon className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
@@ -468,6 +537,30 @@ export default function LeaguePage({
           )}
         </div>
       )}
+
+      <MembershipModal
+        open={membershipModalOpen}
+        kind="league-member"
+        fixedLeague={isNew ? undefined : Number(id)}
+        initialValues={editingMembership ?? undefined}
+        onSaved={() =>
+          queryClient.invalidateQueries({ queryKey: ["league-memberships/"] })
+        }
+        onClose={() => {
+          setMembershipModalOpen(false);
+          setEditingMembership(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!removingMembership}
+        title="Remove team from league"
+        message={`Remove ${removingMembership?.team_name ?? "this team"} from the league? This cannot be undone.`}
+        confirmLabel="Remove"
+        onConfirm={handleRemoveMembership}
+        onCancel={() => setRemovingMembership(null)}
+        loading={removing}
+      />
     </div>
   );
 }

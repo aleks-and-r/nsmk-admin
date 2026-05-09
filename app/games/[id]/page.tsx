@@ -169,7 +169,12 @@ export default function GamePage({
   }
 
   function handleLeagueChange(value: string) {
-    setForm((prev) => ({ ...prev, league: value, home_team: "", away_team: "" }));
+    setForm((prev) => ({
+      ...prev,
+      league: value,
+      home_team: "",
+      away_team: "",
+    }));
     if (errors.league) setErrors((prev) => ({ ...prev, league: undefined }));
     setSaveStatus("idle");
   }
@@ -184,7 +189,6 @@ export default function GamePage({
     if (!form.league.trim()) e.league = "League is required.";
     if (!form.home_team.trim()) e.home_team = "Home team is required.";
     if (!form.away_team.trim()) e.away_team = "Away team is required.";
-    if (!form.scheduled_at.trim()) e.scheduled_at = "Scheduled date is required.";
     return e;
   }
 
@@ -202,7 +206,7 @@ export default function GamePage({
         league: Number(form.league),
         home_team: Number(form.home_team),
         away_team: Number(form.away_team),
-        scheduled_at: form.scheduled_at,
+        ...(form.scheduled_at && { scheduled_at: form.scheduled_at }),
         status: form.status,
         ...(form.round && { round: Number(form.round) }),
         ...(form.playoff_bracket && {
@@ -324,12 +328,12 @@ export default function GamePage({
         <div className="grid grid-cols-2 gap-4">
           <Field label="Home Team" required error={errors.home_team}>
             <SearchableSelect
-              options={teamOptions}
+              options={teamOptions.filter((t) => t.value !== form.away_team)}
               value={form.home_team}
-              onChange={(v) => {
-                handleChange("home_team", v);
-              }}
-              placeholder={form.league ? "Select home team…" : "Select a league first"}
+              onChange={(v) => handleChange("home_team", v)}
+              placeholder={
+                form.league ? "Select home team…" : "Select a league first"
+              }
               disabled={!form.league}
               hasError={!!errors.home_team}
             />
@@ -337,12 +341,12 @@ export default function GamePage({
 
           <Field label="Away Team" required error={errors.away_team}>
             <SearchableSelect
-              options={teamOptions}
+              options={teamOptions.filter((t) => t.value !== form.home_team)}
               value={form.away_team}
-              onChange={(v) => {
-                handleChange("away_team", v);
-              }}
-              placeholder={form.league ? "Select away team…" : "Select a league first"}
+              onChange={(v) => handleChange("away_team", v)}
+              placeholder={
+                form.league ? "Select away team…" : "Select a league first"
+              }
               disabled={!form.league}
               hasError={!!errors.away_team}
             />
@@ -371,7 +375,7 @@ export default function GamePage({
           </Field>
         </div>
 
-        <Field label="Scheduled At" required error={errors.scheduled_at}>
+        <Field label="Scheduled At" error={errors.scheduled_at}>
           <input
             type="datetime-local"
             value={form.scheduled_at}
@@ -421,7 +425,9 @@ export default function GamePage({
 
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
-              {isNew ? "Created successfully. Redirecting…" : "Saved successfully."}
+              {isNew
+                ? "Created successfully. Redirecting…"
+                : "Saved successfully."}
             </span>
           )}
           {saveStatus === "error" && (
@@ -471,19 +477,19 @@ export default function GamePage({
                   <td className="py-2 pr-4 text-foreground font-medium truncate max-w-24">
                     {game?.home_team_name ?? "Home"}
                   </td>
-                  {(
-                    ["home_q1", "home_q2", "home_q3", "home_q4"] as const
-                  ).map((k) => (
-                    <td key={k} className="py-2 px-2">
-                      <input
-                        type="number"
-                        value={score[k]}
-                        onChange={(e) => handleScoreChange(k, e.target.value)}
-                        className={`${inputCls()} text-center`}
-                        min={0}
-                      />
-                    </td>
-                  ))}
+                  {(["home_q1", "home_q2", "home_q3", "home_q4"] as const).map(
+                    (k) => (
+                      <td key={k} className="py-2 px-2">
+                        <input
+                          type="number"
+                          value={score[k]}
+                          onChange={(e) => handleScoreChange(k, e.target.value)}
+                          className={`${inputCls()} text-center`}
+                          min={0}
+                        />
+                      </td>
+                    ),
+                  )}
                   <td className="py-2 pl-4 text-center font-mono font-semibold text-foreground">
                     {game?.home_score != null ? game.home_score : "—"}
                   </td>
@@ -493,19 +499,19 @@ export default function GamePage({
                   <td className="py-2 pr-4 text-foreground font-medium truncate max-w-24">
                     {game?.away_team_name ?? "Away"}
                   </td>
-                  {(
-                    ["away_q1", "away_q2", "away_q3", "away_q4"] as const
-                  ).map((k) => (
-                    <td key={k} className="py-2 px-2">
-                      <input
-                        type="number"
-                        value={score[k]}
-                        onChange={(e) => handleScoreChange(k, e.target.value)}
-                        className={`${inputCls()} text-center`}
-                        min={0}
-                      />
-                    </td>
-                  ))}
+                  {(["away_q1", "away_q2", "away_q3", "away_q4"] as const).map(
+                    (k) => (
+                      <td key={k} className="py-2 px-2">
+                        <input
+                          type="number"
+                          value={score[k]}
+                          onChange={(e) => handleScoreChange(k, e.target.value)}
+                          className={`${inputCls()} text-center`}
+                          min={0}
+                        />
+                      </td>
+                    ),
+                  )}
                   <td className="py-2 pl-4 text-center font-mono font-semibold text-foreground">
                     {game?.away_score != null ? game.away_score : "—"}
                   </td>
