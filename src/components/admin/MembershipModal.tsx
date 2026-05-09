@@ -33,6 +33,7 @@ export interface MembershipModalProps {
 
 interface TeamMemberForm {
   player: string;
+  playerName: string;
   team: string;
   number: string;
   loan: boolean;
@@ -43,6 +44,7 @@ interface TeamMemberForm {
 
 const EMPTY_TM: TeamMemberForm = {
   player: "",
+  playerName: "",
   team: "",
   number: "",
   loan: false,
@@ -104,6 +106,7 @@ export default function MembershipModal({
         const v = initialValues as TeamMembership;
         setTmForm({
           player: String(v.player),
+          playerName: v.player_name,
           team: String(v.team),
           number: v.number != null ? String(v.number) : "",
           loan: v.loan,
@@ -242,8 +245,9 @@ export default function MembershipModal({
                 <Field label="Player" required error={tmErrors.player}>
                   <PlayerCombobox
                     value={tmForm.player}
-                    onChange={(id) => {
-                      setTmForm((f) => ({ ...f, player: id }));
+                    displayName={tmForm.playerName}
+                    onChange={(id, name) => {
+                      setTmForm((f) => ({ ...f, player: id, playerName: name }));
                       setTmErrors((e) => ({ ...e, player: undefined }));
                     }}
                   />
@@ -408,20 +412,22 @@ function Field({
 
 function PlayerCombobox({
   value,
+  displayName,
   onChange,
 }: {
   value: string;
-  onChange: (id: string) => void;
+  displayName: string;
+  onChange: (id: string, name: string) => void;
 }) {
-  const [inputText, setInputText] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(inputText), 300);
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);
-  }, [inputText]);
+  }, [search]);
 
   const { data } = usePaginatedData<PlayerDetail>("players/", 1, debouncedSearch);
   const options = data?.results ?? [];
@@ -430,6 +436,7 @@ function PlayerCombobox({
     function onOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setSearch("");
       }
     }
     if (open) document.addEventListener("mousedown", onOutside);
@@ -438,28 +445,48 @@ function PlayerCombobox({
 
   return (
     <div ref={containerRef} className="relative">
-      <input
-        type="text"
-        value={inputText}
-        onChange={(e) => { setInputText(e.target.value); onChange(""); setOpen(true); }}
-        onFocus={() => setOpen(true)}
-        placeholder="Search by name…"
-        className={inputCls()}
-      />
-      {open && options.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-card-bg border border-card-border rounded shadow-lg max-h-48 overflow-y-auto">
-          {options.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => { onChange(String(p.id)); setInputText(p.full_name); setOpen(false); }}
-              className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent/10 ${
-                String(p.id) === value ? "text-accent font-medium bg-accent/5" : "text-foreground"
-              }`}
-            >
-              {p.full_name}
-            </button>
-          ))}
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className="w-full px-3 py-2 bg-background border border-card-border rounded text-sm text-left flex items-center justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
+      >
+        <span className={value && displayName ? "text-foreground" : "text-foreground/40"}>
+          {value && displayName ? displayName : "Search player…"}
+        </span>
+        <svg className={`w-4 h-4 text-foreground/40 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-card-bg border border-card-border rounded shadow-lg flex flex-col max-h-60">
+          <div className="p-2 border-b border-card-border shrink-0">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name…"
+              className="w-full px-2 py-1.5 bg-background border border-card-border rounded text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+              autoFocus
+            />
+          </div>
+          <div className="overflow-y-auto">
+            {options.length === 0 ? (
+              <p className="px-3 py-2 text-sm text-foreground/50">No results.</p>
+            ) : (
+              options.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => { onChange(String(p.id), p.full_name); setOpen(false); setSearch(""); }}
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent/10 ${
+                    String(p.id) === value ? "text-accent font-medium bg-accent/5" : "text-foreground"
+                  }`}
+                >
+                  {p.full_name}
+                </button>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import apiClient from "@/lib/axios";
 import { importFile } from "@/lib/importFile";
+import type { PaginatedResponse } from "@/types/api";
 
 export interface Club {
   id: string;
@@ -26,8 +27,8 @@ export interface ClubDetail {
   instagram_url: string;
 }
 
-export const getClubs = async (): Promise<Club[]> => {
-  const { data } = await apiClient.get<Club[]>("clubs/");
+export const getClubs = async (): Promise<PaginatedResponse<Club>> => {
+  const { data } = await apiClient.get<PaginatedResponse<Club>>("clubs/");
   return data;
 };
 

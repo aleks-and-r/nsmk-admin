@@ -269,7 +269,7 @@ export default function TeamPage({
             className={inputCls(!!errors.club)}
           >
             <option value="">Select club…</option>
-            {clubsData?.map((c) => (
+            {clubsData?.results.map((c) => (
               <option key={c.id} value={String(c.id)}>
                 {c.name}
               </option>
