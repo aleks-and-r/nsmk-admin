@@ -64,6 +64,27 @@ export const deleteTeamMembership = async (id: number): Promise<void> => {
   await apiClient.delete(`team-memberships/${id}/`);
 };
 
+export const reactivateTeamMembership = async (
+  id: number,
+  patch: Partial<TeamMembershipPayload>,
+): Promise<TeamMembership> => {
+  const { data } = await apiClient.patch<TeamMembership>(
+    `team-memberships/${id}/?include_inactive=true`,
+    patch,
+  );
+  return data;
+};
+
+export const findInactiveTeamMembership = async (
+  playerId: number,
+  teamId: number,
+): Promise<TeamMembership | null> => {
+  const { data } = await apiClient.get<PaginatedResponse<TeamMembership>>(
+    `team-memberships/?include_inactive=true&player=${playerId}&team=${teamId}`,
+  );
+  return data.results.find((m) => !m.is_active) ?? null;
+};
+
 export const bulkUpdateTeamMemberships = async (
   ids: number[],
   patch: { is_active: boolean },

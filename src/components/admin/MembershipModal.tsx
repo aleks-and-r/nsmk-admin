@@ -7,6 +7,8 @@ import type { TeamMembership, TeamMembershipPayload } from "@/services/team-memb
 import {
   createTeamMembership,
   updateTeamMembership,
+  reactivateTeamMembership,
+  findInactiveTeamMembership,
 } from "@/services/team-memberships.service";
 import type { LeagueMembership, LeagueMembershipPayload } from "@/services/league-memberships.service";
 import {
@@ -168,7 +170,21 @@ export default function MembershipModal({
         if (isEdit) {
           await updateTeamMembership((initialValues as TeamMembership).id, payload);
         } else {
-          await createTeamMembership(payload);
+          const inactive = await findInactiveTeamMembership(
+            Number(tmForm.player),
+            Number(tmForm.team),
+          );
+          if (inactive) {
+            await reactivateTeamMembership(inactive.id, {
+              is_active: true,
+              left_at: null,
+              ...(payload.number !== undefined && { number: payload.number }),
+              ...(payload.loan !== undefined && { loan: payload.loan }),
+              ...(payload.joined_at !== undefined && { joined_at: payload.joined_at }),
+            });
+          } else {
+            await createTeamMembership(payload);
+          }
         }
       } else {
         const errs: LeagueMemberErrors = {};
