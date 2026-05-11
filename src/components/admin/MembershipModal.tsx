@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePaginatedData } from "@/hooks/queries/usePaginatedData";
 import { useTeams } from "@/hooks/queries/useTeams";
+import { useLeagues } from "@/hooks/queries/useLeagues";
 import type { TeamMembership, TeamMembershipPayload } from "@/services/team-memberships.service";
 import {
   createTeamMembership,
@@ -98,6 +99,9 @@ export default function MembershipModal({
 
   const { data: teamsData } = useTeams();
   const teamOptions = teamsData?.results ?? [];
+
+  const { data: leaguesData } = useLeagues();
+  const leagueOptions = leaguesData?.results ?? [];
 
   // Populate form from initialValues on open
   useEffect(() => {
@@ -336,6 +340,20 @@ export default function MembershipModal({
             </>
           ) : (
             <>
+              {fixedLeague == null && (
+                <Field label="League" required error={lmErrors.league}>
+                  <SearchableSelect
+                    options={leagueOptions.map((l) => ({ value: String(l.id), label: `${l.name} — ${l.season_name}` }))}
+                    value={lmForm.league}
+                    onChange={(v) => {
+                      setLmForm((f) => ({ ...f, league: v }));
+                      setLmErrors((e) => ({ ...e, league: undefined }));
+                    }}
+                    placeholder="Select league…"
+                    hasError={!!lmErrors.league}
+                  />
+                </Field>
+              )}
               {fixedTeam == null && (
                 <Field label="Team" required error={lmErrors.team}>
                   <SearchableSelect
