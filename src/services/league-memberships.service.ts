@@ -8,6 +8,7 @@ export interface LeagueMembership {
   in_competition: boolean;
   is_withdrawn: boolean;
   team_name: string;
+  league_name: string;
 }
 
 export interface LeagueMembershipPayload {

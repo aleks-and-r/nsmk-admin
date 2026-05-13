@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTeam, useTeamMemberships } from "@/hooks/queries/useTeams";
 import { useLeagueMembershipsByTeam } from "@/hooks/queries/useLeagueMemberships";
+import { useLeagues } from "@/hooks/queries/useLeagues";
 import { useClubs } from "@/hooks/queries/useClubs";
 import {
   createTeam,
@@ -56,12 +57,24 @@ export default function TeamPage({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: team, isLoading, isError } = useTeam(isNew ? "" : id);
-  const { data: clubsData } = useClubs();
-  const { data: playerMemberships } = useTeamMemberships(isNew ? "" : id);
-  const { data: leagueMemberships } = useLeagueMembershipsByTeam(
+  const { data: team, isLoading, isError, refetch: refetchTeam } = useTeam(isNew ? "" : id);
+  const { data: clubsData, refetch: refetchClubs } = useClubs();
+  const { data: playerMemberships, refetch: refetchPlayerMemberships } = useTeamMemberships(isNew ? "" : id);
+  const { data: leagueMemberships, refetch: refetchLeagueMemberships } = useLeagueMembershipsByTeam(
     isNew ? "" : id,
   );
+  const { refetch: refetchLeagues } = useLeagues();
+
+  useEffect(() => {
+    refetchClubs();
+    refetchLeagues();
+    if (!isNew) {
+      refetchTeam();
+      refetchPlayerMemberships();
+      refetchLeagueMemberships();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -191,7 +204,9 @@ export default function TeamPage({
     try {
       await deleteLeagueMembership(removingLeague.id);
       setRemovingLeague(null);
-      await queryClient.invalidateQueries({ queryKey: ["league-memberships/"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["league-memberships/"],
+      });
     } catch {
       // ignore
     } finally {
@@ -296,7 +311,9 @@ export default function TeamPage({
 
           {saveStatus === "success" && (
             <span className="text-sm text-green-600">
-              {isNew ? "Created successfully. Redirecting…" : "Saved successfully."}
+              {isNew
+                ? "Created successfully. Redirecting…"
+                : "Saved successfully."}
             </span>
           )}
           {saveStatus === "error" && (
@@ -471,7 +488,7 @@ export default function TeamPage({
                     className="border-b border-card-border last:border-0 hover:bg-black/3 transition-colors"
                   >
                     <td className="px-4 py-3 text-foreground font-medium">
-                      {m.league}
+                      {m.team_name}
                     </td>
                     <td className="px-4 py-3">
                       <span
