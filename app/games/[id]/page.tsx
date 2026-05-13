@@ -10,6 +10,7 @@ import {
   createGame,
   updateGame,
   updateGameScore,
+  importGameStats,
   type GamePayload,
   type GameScorePayload,
   type GameStatus,
@@ -134,6 +135,11 @@ export default function GamePage({
   const [scoreStatus, setScoreStatus] = useState<"idle" | "success" | "error">(
     "idle",
   );
+
+  // Import stats
+  const [importingStats, setImportingStats] = useState(false);
+  const [importStatsStatus, setImportStatsStatus] = useState<"idle" | "success" | "error">("idle");
+  const statsImportRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (game) {
@@ -260,6 +266,22 @@ export default function GamePage({
     }
   }
 
+  async function handleImportStats(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportingStats(true);
+    setImportStatsStatus("idle");
+    try {
+      await importGameStats(id, file);
+      setImportStatsStatus("success");
+    } catch {
+      setImportStatsStatus("error");
+    } finally {
+      setImportingStats(false);
+      e.target.value = "";
+    }
+  }
+
   // ── Loading / error states ──────────────────────────────────────────────────
 
   if (!isNew && isLoading) {
@@ -296,6 +318,39 @@ export default function GamePage({
           },
         ]}
       />
+
+      {/* ── Import Stats (existing games only) ───────────────────────────── */}
+      {!isNew && (
+        <div className="bg-card-bg border border-card-border rounded-lg p-6">
+          <h2 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider mb-4">
+            Import Stats
+          </h2>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="raw"
+              size="sm"
+              onClick={() => statsImportRef.current?.click()}
+              disabled={importingStats}
+              className="bg-btn-download hover:bg-btn-download/90 disabled:opacity-40 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded text-sm font-medium"
+            >
+              {importingStats ? "Importing…" : "Import Stats (CSV / XLSX)"}
+            </Button>
+            <input
+              ref={statsImportRef}
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              className="hidden"
+              onChange={handleImportStats}
+            />
+            {importStatsStatus === "success" && (
+              <span className="text-sm text-green-600">Imported successfully.</span>
+            )}
+            {importStatsStatus === "error" && (
+              <span className="text-sm text-red-500">Import failed. Please try again.</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Game Info ──────────────────────────────────────────────────────── */}
       <div className="bg-card-bg border border-card-border rounded-lg p-6 space-y-5">
