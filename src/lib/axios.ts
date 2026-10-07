@@ -3,8 +3,9 @@ import { clearAuthState } from './auth';
 import { refreshTokenApi } from '@/services/auth.service';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/',
-  timeout: 10000,
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? '/api/',
+  // Long enough for a free-tier API host to wake from sleep (~50s cold start).
+  timeout: 60000,
   // Send the httpOnly auth cookies with every request.
   withCredentials: true,
   // X-Requested-With is required by the API's CSRF check on non-GET requests.

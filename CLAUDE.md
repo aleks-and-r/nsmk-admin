@@ -31,8 +31,10 @@ for validation.
 Not yet implemented (returns 501): CSV import/export and the computed league
 endpoints (standings, leaders, results, schedule, team-stats, refresh-summaries).
 
-`.env` sets `NEXT_PUBLIC_API_URL=http://localhost:3001/api/`; the frontend only
-talks to the local backend in `server/`.
+The browser only calls this app's own `/api/*` and `/media/*`; `next.config.ts`
+rewrites them to `API_ORIGIN` (default `http://localhost:3001`). This keeps auth
+cookies first-party in production (Vercel frontend → Render API), so don't point
+`NEXT_PUBLIC_API_URL` at the API host directly.
 
 ## Theme
 

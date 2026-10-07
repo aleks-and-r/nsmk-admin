@@ -9,7 +9,6 @@
       "Bash(break)",
       "Bash(curl -s http://localhost:3001/health)",
       "Bash(curl -s -X POST http://localhost:3001/api/auth/login/ -H 'Content-Type: application/json' -d '{\"username\":\"admin\",\"password\":\"nope\"}' -w '\\\\nHTTP %{http_code}\\\\n')",
-      "Bash(curl -s -X POST http://localhost:3001/api/auth/login/ -H 'Content-Type: application/json' -d '{\"username\":\"admin\",\"password\":\"admin123\"}' -o /private/tmp/claude-501/-Users-aleksandar-Projects-nsmk-admin/ae9888f7-a201-4293-be5e-883e783ba085/scratchpad/login.json -w 'HTTP %{http_code}\\\\n')",
       "Bash(npm run *)",
       "Bash(npm --prefix /Users/aleksandar/Projects/nsmk-admin/server run dev)",
       "Bash(curl -sf -o /dev/null http://localhost:3001/health)",
