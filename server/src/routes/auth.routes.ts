@@ -5,7 +5,11 @@ import { prisma } from '../prisma.js';
 import { ApiError, unauthorized } from '../lib/errors.js';
 import { asyncHandler } from '../middleware/error.js';
 import {
+  REFRESH_COOKIE,
+  clearAuthCookies,
   requireAuth,
+  setAccessCookie,
+  setRefreshCookie,
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
@@ -31,25 +35,31 @@ authRouter.post(
       throw unauthorized('No active account found with the given credentials');
     }
 
-    res.json({
-      access: signAccessToken(user.id),
-      refresh: signRefreshToken(user.id),
-    });
+    // Tokens travel only as httpOnly cookies; the body carries the profile.
+    setAccessCookie(res, signAccessToken(user.id));
+    setRefreshCookie(res, signRefreshToken(user.id));
+    res.json(serializeUser(user));
   }),
 );
 
 authRouter.post(
   '/auth/refresh/',
   asyncHandler(async (req, res) => {
-    const { refresh } = z.object({ refresh: z.string().min(1) }).parse(req.body);
-    const userId = verifyRefreshToken(refresh);
+    const userId = verifyRefreshToken(req.cookies?.[REFRESH_COOKIE]);
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw unauthorized('Token is invalid or expired');
 
-    res.json({ access: signAccessToken(user.id) });
+    setAccessCookie(res, signAccessToken(user.id));
+    res.status(204).end();
   }),
 );
+
+// Public on purpose: the access token may already be expired when logging out.
+authRouter.post('/auth/logout/', (_req, res) => {
+  clearAuthCookies(res);
+  res.status(204).end();
+});
 
 authRouter.get(
   '/users/me/',

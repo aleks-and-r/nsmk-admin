@@ -29,8 +29,8 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout().catch(() => {});
     router.push('/login');
   }
 

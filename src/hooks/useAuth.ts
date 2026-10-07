@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAuthState, setAuthState, clearAuthState, setTokens } from '@/lib/auth';
-import { loginApi } from '@/services/auth.service';
+import { getAuthState, setAuthState, clearAuthState } from '@/lib/auth';
+import { loginApi, logoutApi } from '@/services/auth.service';
 
 interface AuthUser {
   username: string;
@@ -13,7 +13,7 @@ interface UseAuthReturn {
   user: AuthUser | null;
   mounted: boolean;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -26,15 +26,20 @@ export function useAuth(): UseAuthReturn {
   }, []);
 
   async function login(username: string, password: string): Promise<void> {
-    const { access, refresh } = await loginApi(username, password);
-    setTokens(access, refresh);
-    setAuthState(username);
-    setUser({ username });
+    // The API sets the auth cookies on the response.
+    const me = await loginApi(username, password);
+    setAuthState(me.username);
+    setUser({ username: me.username });
   }
 
-  function logout() {
-    clearAuthState();
-    setUser(null);
+  async function logout(): Promise<void> {
+    try {
+      // Only the server can clear httpOnly cookies.
+      await logoutApi();
+    } finally {
+      clearAuthState();
+      setUser(null);
+    }
   }
 
   return {

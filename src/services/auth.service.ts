@@ -1,7 +1,13 @@
 import axios from "axios";
 
-// Plain axios — NOT apiClient, so our interceptors don't interfere with auth calls
-const authAxios = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/", timeout: 10000 });
+// Plain axios — NOT apiClient, so our interceptors don't interfere with auth calls.
+// Tokens live in httpOnly cookies set by the API; withCredentials makes the browser send them.
+const authAxios = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/",
+  timeout: 10000,
+  withCredentials: true,
+  headers: { "X-Requested-With": "XMLHttpRequest" },
+});
 
 export interface UserProfile {
   id: number;
@@ -11,40 +17,26 @@ export interface UserProfile {
   last_name: string;
 }
 
-interface LoginResponse {
-  access: string;
-  refresh: string;
-}
-
-interface RefreshResponse {
-  access: string;
-}
-
 export async function loginApi(
   username: string,
   password: string,
-): Promise<LoginResponse> {
-  const { data } = await authAxios.post<LoginResponse>("auth/login/", {
+): Promise<UserProfile> {
+  const { data } = await authAxios.post<UserProfile>("auth/login/", {
     username,
     password,
   });
   return data;
 }
 
-export async function refreshTokenApi(
-  refresh: string,
-): Promise<RefreshResponse> {
-  const { data } = await authAxios.post<RefreshResponse>("auth/refresh/", {
-    refresh,
-  });
-  return data;
+export async function refreshTokenApi(): Promise<void> {
+  await authAxios.post("auth/refresh/");
+}
+
+export async function logoutApi(): Promise<void> {
+  await authAxios.post("auth/logout/");
 }
 
 export async function getMeApi(): Promise<UserProfile> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const { data } = await authAxios.get<UserProfile>("users/me/", {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+  const { data } = await authAxios.get<UserProfile>("users/me/");
   return data;
 }

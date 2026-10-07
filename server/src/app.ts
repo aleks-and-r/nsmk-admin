@@ -1,8 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { env } from './env.js';
 import { UPLOAD_DIR } from './middleware/upload.js';
-import { requireAuth } from './middleware/auth.js';
+import { requireAuth, requireCsrfHeader } from './middleware/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 import { authRouter } from './routes/auth.routes.js';
@@ -22,7 +23,13 @@ import { notImplementedRouter } from './routes/not-implemented.routes.js';
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: env.corsOrigin.split(',').map((o) => o.trim()) }));
+  app.use(
+    cors({
+      origin: env.corsOrigin.split(',').map((o) => o.trim()),
+      credentials: true,
+    }),
+  );
+  app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use('/media', express.static(UPLOAD_DIR));
@@ -30,6 +37,7 @@ export function createApp() {
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
   const api = express.Router();
+  api.use(requireCsrfHeader);
   api.use(authRouter);
 
   api.use(requireAuth);

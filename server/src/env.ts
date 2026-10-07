@@ -14,4 +14,11 @@ export const env = {
   refreshTtl: process.env.REFRESH_TOKEN_TTL ?? '7d',
   port: Number(process.env.PORT ?? 3001),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  // Frontend and API on different sites (e.g. remote API) need SameSite=None,
+  // which browsers only accept together with Secure.
+  cookieSameSite: (process.env.COOKIE_SAMESITE ?? 'lax') as 'lax' | 'strict' | 'none',
+  cookieSecure:
+    process.env.COOKIE_SECURE !== undefined
+      ? process.env.COOKIE_SECURE === 'true'
+      : process.env.NODE_ENV === 'production' || process.env.COOKIE_SAMESITE === 'none',
 };

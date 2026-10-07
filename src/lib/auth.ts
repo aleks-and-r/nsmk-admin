@@ -1,6 +1,7 @@
+// Tokens are httpOnly cookies managed by the API and are not readable here.
+// This only remembers *who* is logged in so the UI can guard routes; the API
+// still rejects requests whose cookies are missing or expired.
 const AUTH_KEY = 'nsmk_auth';
-const TOKEN_KEY = 'token';
-const REFRESH_KEY = 'nsmk_refresh';
 
 interface AuthState {
   username: string;
@@ -26,34 +27,7 @@ export function setAuthState(username: string): void {
 export function clearAuthState(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(AUTH_KEY);
-  clearTokens();
-}
-
-// ── Token helpers ──────────────────────────────────────────────────────────
-
-export function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setTokens(access: string, refresh: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, access);
-  localStorage.setItem(REFRESH_KEY, refresh);
-}
-
-export function getRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(REFRESH_KEY);
-}
-
-export function clearTokens(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
-}
-
-export function storeNewAccessToken(access: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, access);
+  // Tokens from the previous localStorage-based login.
+  localStorage.removeItem('token');
+  localStorage.removeItem('nsmk_refresh');
 }
