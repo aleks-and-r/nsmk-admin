@@ -32,6 +32,11 @@ yarn-error.log*
 .env*.local
 .env
 
+# backend
+/server/node_modules
+/server/dist
+/server/uploads
+
 # vercel
 .vercel
 

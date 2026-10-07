@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GameStatus {
+  scheduled
+  in_progress
+  finished
+  cancelled
+  postponed
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  email        String   @default("")
+  firstName    String   @default("") @map("first_name")
+  lastName     String   @default("") @map("last_name")
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Club {
+  id           Int     @id @default(autoincrement())
+  name         String
+  shortName    String  @default("") @map("short_name")
+  owner        String  @default("")
+  contactEmail String? @map("contact_email")
+  contactPhone String? @map("contact_phone")
+  website      String  @default("")
+  facebookUrl  String  @default("") @map("facebook_url")
+  twitterUrl   String  @default("") @map("twitter_url")
+  instagramUrl String  @default("") @map("instagram_url")
+  logo         String?
+
+  teams   Team[]
+  players Player[]
+
+  @@map("clubs")
+}
+
+model Coach {
+  id         Int    @id @default(autoincrement())
+  firstName  String @map("first_name")
+  lastName   String @map("last_name")
+  middleName String @default("") @map("middle_name")
+  email      String @default("")
+  birthYear  Int?   @map("birth_year")
+
+  @@map("coaches")
+}
+
+model Player {
+  id        Int       @id @default(autoincrement())
+  firstName String    @map("first_name")
+  lastName  String    @map("last_name")
+  birthYear Int?      @map("birth_year")
+  birthDate DateTime? @map("birth_date") @db.Date
+  position  String    @default("")
+  isActive  Boolean   @default(true) @map("is_active")
+  photo     String?
+
+  clubId Int?  @map("club_id")
+  club   Club? @relation(fields: [clubId], references: [id], onDelete: SetNull)
+
+  teamMemberships TeamMembership[]
+  gameStats       PlayerGameStat[]
+
+  @@map("players")
+}
+
+model Season {
+  id        Int       @id @default(autoincrement())
+  name      String
+  startDate DateTime? @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+  isActive  Boolean   @default(false) @map("is_active")
+
+  leagues League[]
+  teams   Team[]
+
+  @@map("seasons")
+}
+
+model League {
+  id                 Int     @id @default(autoincrement())
+  name               String
+  ageGroup           String  @default("") @map("age_group")
+  referenceBirthYear Int?    @map("reference_birth_year")
+  pointsForWin       Int     @default(2) @map("points_for_win")
+  pointsForLoss      Int     @default(1) @map("points_for_loss")
+  pointsForForfeit   Int     @default(0) @map("points_for_forfeit")
+  isActive           Boolean @default(true) @map("is_active")
+
+  seasonId Int    @map("season_id")
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  rounds      Round[]
+  memberships LeagueMembership[]
+  games       Game[]
+
+  @@map("leagues")
+}
+
+model Round {
+  id    Int    @id @default(autoincrement())
+  name  String
+  order Int    @default(0)
+
+  leagueId Int    @map("league_id")
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  games Game[]
+
+  @@map("rounds")
+}
+
+model Team {
+  id            Int     @id @default(autoincrement())
+  name          String
+  ageGroupLabel String  @default("") @map("age_group_label")
+  isActive      Boolean @default(true) @map("is_active")
+
+  clubId Int  @map("club_id")
+  club   Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  seasonId Int?    @map("season_id")
+  season   Season? @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+
+  memberships       TeamMembership[]
+  leagueMemberships LeagueMembership[]
+  homeGames         Game[]             @relation("HomeTeam")
+  awayGames         Game[]             @relation("AwayTeam")
+  gameStats         PlayerGameStat[]
+
+  @@map("teams")
+}
+
+model Venue {
+  id         Int     @id @default(autoincrement())
+  name       String
+  address    String  @default("")
+  city       String  @default("")
+  courtCount Int     @default(1) @map("court_count")
+  isActive   Boolean @default(true) @map("is_active")
+
+  games Game[]
+
+  @@map("venues")
+}
+
+model Game {
+  id          Int        @id @default(autoincrement())
+  scheduledAt DateTime?  @map("scheduled_at")
+  courtName   String     @default("") @map("court_name")
+  status      GameStatus @default(scheduled)
+  notes       String     @default("")
+
+  // Nullable placeholder — playoff brackets have no model or UI yet.
+  playoffBracket Int? @map("playoff_bracket")
+
+  homeQ1 Int? @map("home_q1")
+  homeQ2 Int? @map("home_q2")
+  homeQ3 Int? @map("home_q3")
+  homeQ4 Int? @map("home_q4")
+  awayQ1 Int? @map("away_q1")
+  awayQ2 Int? @map("away_q2")
+  awayQ3 Int? @map("away_q3")
+  awayQ4 Int? @map("away_q4")
+
+  homeScore Int? @map("home_score")
+  awayScore Int? @map("away_score")
+
+  leagueId Int    @map("league_id")
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  roundId Int?   @map("round_id")
+  round   Round? @relation(fields: [roundId], references: [id], onDelete: SetNull)
+
+  homeTeamId Int  @map("home_team_id")
+  homeTeam   Team @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Cascade)
+
+  awayTeamId Int  @map("away_team_id")
+  awayTeam   Team @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Cascade)
+
+  venueId Int?   @map("venue_id")
+  venue   Venue? @relation(fields: [venueId], references: [id], onDelete: SetNull)
+
+  stats PlayerGameStat[]
+
+  @@map("games")
+}
+
+model LeagueMembership {
+  id            Int     @id @default(autoincrement())
+  inCompetition Boolean @default(true) @map("in_competition")
+  isWithdrawn   Boolean @default(false) @map("is_withdrawn")
+
+  leagueId Int    @map("league_id")
+  league   League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  teamId Int  @map("team_id")
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, teamId])
+  @@map("league_memberships")
+}
+
+model TeamMembership {
+  id       Int       @id @default(autoincrement())
+  number   Int?
+  loan     Boolean   @default(false)
+  isActive Boolean   @default(true) @map("is_active")
+  joinedAt DateTime? @map("joined_at") @db.Date
+  leftAt   DateTime? @map("left_at") @db.Date
+
+  playerId Int    @map("player_id")
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  teamId Int  @map("team_id")
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, teamId])
+  @@map("team_memberships")
+}
+
+model PlayerGameStat {
+  id         Int @id @default(autoincrement())
+  ftMade     Int @default(0) @map("ft_made")
+  twoPtMade  Int @default(0) @map("two_pt_made")
+  threePtMade Int @default(0) @map("three_pt_made")
+  fouls      Int @default(0)
+
+  gameId Int  @map("game_id")
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  playerId Int    @map("player_id")
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  teamId Int  @map("team_id")
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, playerId])
+  @@map("player_game_stats")
+}

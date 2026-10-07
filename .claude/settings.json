@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I{} echo {})",
+      "Bash(brew install *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"console.log\\(require\\('./package.json'\\).dependencies.multer\\)\")",
+      "Bash(curl -sf http://localhost:3001/health)",
+      "Bash(break)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(curl -s -X POST http://localhost:3001/api/auth/login/ -H 'Content-Type: application/json' -d '{\"username\":\"admin\",\"password\":\"nope\"}' -w '\\\\nHTTP %{http_code}\\\\n')",
+      "Bash(curl -s -X POST http://localhost:3001/api/auth/login/ -H 'Content-Type: application/json' -d '{\"username\":\"admin\",\"password\":\"admin123\"}' -o /private/tmp/claude-501/-Users-aleksandar-Projects-nsmk-admin/ae9888f7-a201-4293-be5e-883e783ba085/scratchpad/login.json -w 'HTTP %{http_code}\\\\n')",
+      "Bash(npm run *)",
+      "Bash(npm --prefix /Users/aleksandar/Projects/nsmk-admin/server run dev)",
+      "Bash(curl -sf -o /dev/null http://localhost:3001/health)",
+      "Bash(curl -s -D - -o /dev/null http://localhost:3001/api/clubs/ -H 'Origin: http://localhost:3002' -H 'Authorization: Bearer __TRACKED_VAR__')",
+      "Bash(git stash *)",
+      "Bash(npx prisma *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/jsonwebtoken/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('/Users/aleksandar/Projects/nsmk-admin/server/node_modules/multer/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('/Users/aleksandar/Projects/nsmk-admin/server/node_modules/express/package.json'\\).version\\)\")"
+    ],
+    "additionalDirectories": [
+      "/Users/aleksandar/Projects/nsmk-admin/server/uploads"
+    ]
+  }
+}

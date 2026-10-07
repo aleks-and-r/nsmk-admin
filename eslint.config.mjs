@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The backend has its own tsconfig and is not a Next.js surface.
+    "server/**",
   ]),
 ]);
 
